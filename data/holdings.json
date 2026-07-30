@@ -6,7 +6,7 @@
     "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48"
   },
   "positions": [
-    { "ticker": "VT", "name": "Vanguard Total World", "sector": "코어 인덱스", "targetWeight": 0.4, "targetUsd": 200000, "currency": "USD", "yahoo": "VT", "status": "매수중", "qty": 1, "avgPrice": 152.22 },
+    { "ticker": "VT", "name": "Vanguard Total World", "sector": "코어 인덱스", "targetWeight": 0.4, "targetUsd": 200000, "currency": "USD", "yahoo": "VT", "status": "매도", "qty": 0, "avgPrice": 152.22 },
     { "ticker": "MSFT", "name": "Microsoft", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "USD", "yahoo": "MSFT", "status": "매수중", "qty": 26, "avgPrice": 390.325 },
     { "ticker": "META", "name": "Meta Platforms", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "USD", "yahoo": "META", "status": "매수중", "qty": 17, "avgPrice": 593.4 },
     { "ticker": "INTC", "name": "Intel", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "USD", "yahoo": "INTC", "status": "매수중", "qty": 117, "avgPrice": 87.3 },
