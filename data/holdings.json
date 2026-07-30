@@ -1,0 +1,34 @@
+{
+  "meta": {
+    "team": "글리프자운팀",
+    "targetTotalUsd": 500000,
+    "updatedAt": "2026-07-30",
+    "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48"
+  },
+  "positions": [
+    { "ticker": "VT", "name": "Vanguard Total World", "sector": "코어 인덱스", "targetWeight": 0.4, "targetUsd": 200000, "currency": "USD", "yahoo": "VT", "status": "미매수" },
+    { "ticker": "MSFT", "name": "Microsoft", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "USD", "yahoo": "MSFT", "status": "매수중", "qty": 26, "avgPrice": 390.325 },
+    { "ticker": "META", "name": "Meta Platforms", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "USD", "yahoo": "META", "status": "매수중", "qty": 17, "avgPrice": 593.4 },
+    { "ticker": "INTC", "name": "Intel", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "USD", "yahoo": "INTC", "status": "매수중", "qty": 117, "avgPrice": 87.3 },
+    { "ticker": "005930", "name": "삼성전자", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "KRW", "yahoo": "005930.KS", "status": "매수중", "qty": 71, "avgPrice": 207489 },
+    { "ticker": "000660", "name": "SK하이닉스", "sector": "AI CapEx", "targetWeight": 0.03, "targetUsd": 15000, "currency": "KRW", "yahoo": "000660.KS", "status": "매수중", "qty": 11, "avgPrice": 1318909 },
+    { "ticker": "QCOM", "name": "Qualcomm", "sector": "메모리 역상관", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "QCOM", "status": "매수중", "qty": 52, "avgPrice": 161.085 },
+    { "ticker": "AAPL", "name": "Apple", "sector": "메모리 역상관", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "AAPL", "status": "미매수" },
+    { "ticker": "2454.TW", "name": "MediaTek", "sector": "메모리 역상관", "targetWeight": 0.025, "targetUsd": 12500, "currency": "TWD", "yahoo": "2454.TW", "status": "미매수" },
+    { "ticker": "DELL", "name": "Dell Technologies", "sector": "메모리 역상관", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "DELL", "status": "미매수" },
+    { "ticker": "XOM", "name": "Exxon Mobil", "sector": "에너지", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "XOM", "status": "미매수" },
+    { "ticker": "CVX", "name": "Chevron", "sector": "에너지", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "CVX", "status": "미매수" },
+    { "ticker": "SHEL", "name": "Shell", "sector": "에너지", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "SHEL", "status": "미매수" },
+    { "ticker": "TTE", "name": "TotalEnergies", "sector": "에너지", "targetWeight": 0.025, "targetUsd": 12500, "currency": "USD", "yahoo": "TTE", "status": "미매수" },
+    { "ticker": "HO.PA", "name": "Thales", "sector": "유럽 방산", "targetWeight": 0.025, "targetUsd": 12500, "currency": "EUR", "yahoo": "HO.PA", "status": "미매수" },
+    { "ticker": "BA.L", "name": "BAE Systems", "sector": "유럽 방산", "targetWeight": 0.025, "targetUsd": 12500, "currency": "GBp", "yahoo": "BA.L", "status": "미매수" },
+    { "ticker": "RHM.DE", "name": "Rheinmetall", "sector": "유럽 방산", "targetWeight": 0.025, "targetUsd": 12500, "currency": "EUR", "yahoo": "RHM.DE", "status": "미매수" },
+    { "ticker": "TLT", "name": "iShares 20+ Yr Treasury", "sector": "금리 (인하)", "targetWeight": 0.0375, "targetUsd": 18750, "currency": "USD", "yahoo": "TLT", "status": "미매수" },
+    { "ticker": "IEF", "name": "iShares 7-10 Yr Treasury", "sector": "금리 (인하)", "targetWeight": 0.0375, "targetUsd": 18750, "currency": "USD", "yahoo": "IEF", "status": "미매수" },
+    { "ticker": "JPM", "name": "JPMorgan Chase", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "JPM", "status": "미매수" },
+    { "ticker": "BAC", "name": "Bank of America", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "BAC", "status": "미매수" },
+    { "ticker": "KRE", "name": "SPDR Regional Banking", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "KRE", "status": "미매수" },
+    { "ticker": "XLF", "name": "Financial Select Sector", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "XLF", "status": "미매수" },
+    { "ticker": "SGOV", "name": "iShares 0-3M Treasury", "sector": "현금", "targetWeight": 0.05, "targetUsd": 25000, "currency": "USD", "yahoo": "SGOV", "status": "미매수" }
+  ]
+}
