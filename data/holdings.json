@@ -2,7 +2,7 @@
   "meta": {
     "team": "글리프자운팀",
     "targetTotalUsd": 500000,
-    "updatedAt": "2026-07-30",
+    "updatedAt": "2026-08-03",
     "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48"
   },
   "positions": [
@@ -29,6 +29,6 @@
     { "ticker": "BAC", "name": "Bank of America", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "BAC", "status": "미매수" },
     { "ticker": "KRE", "name": "SPDR Regional Banking", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "KRE", "status": "미매수" },
     { "ticker": "XLF", "name": "Financial Select Sector", "sector": "금리 (인상)", "targetWeight": 0.0125, "targetUsd": 6250, "currency": "USD", "yahoo": "XLF", "status": "미매수" },
-    { "ticker": "SGOV", "name": "iShares 0-3M Treasury", "sector": "현금", "targetWeight": 0.05, "targetUsd": 25000, "currency": "USD", "yahoo": "SGOV", "status": "미매수" }
+    { "ticker": "SGOV", "name": "iShares 0-3M Treasury", "sector": "현금", "targetWeight": 0.05, "targetUsd": 25000, "currency": "USD", "yahoo": "SGOV", "status": "매수완료", "qty": 248, "avgPrice": 100.425 }
   ]
 }
