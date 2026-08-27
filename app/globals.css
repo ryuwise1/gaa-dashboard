@@ -1139,3 +1139,125 @@ a { color: var(--accent); }
 /* S&P 대비 두 관점 병기 */
 .trend-vs { display: inline-flex; align-items: baseline; gap: 7px; flex-wrap: wrap; }
 .trend-vs i { font-style: normal; font-weight: 700; }
+
+/* ── AP · MP 비중 괴리 ──────────────────────────────────────────────
+   MP(목표)와 AP(실제)를 나란히 놓고, 그 차이를 0을 기준으로 좌우로
+   뻗는 막대로 보여준다. 부족/초과가 방향으로 읽혀야 표가 액션이 된다. */
+.alloc-note {
+  margin: 2px 0 14px;
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+.alloc-note b { color: var(--ink-2); font-weight: 700; }
+.alloc-note em { font-style: normal; color: var(--ink-2); font-weight: 600; }
+
+.alloc-head,
+.alloc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px 52px minmax(140px, 1.15fr) 92px;
+  align-items: center;
+  gap: 10px;
+}
+.alloc-head {
+  padding: 0 0 7px;
+  border-bottom: 1px solid var(--hairline-2);
+  font-size: 10.5px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+.alloc-head span:nth-child(2),
+.alloc-head span:nth-child(3),
+.alloc-head span:last-child { text-align: right; }
+
+.alloc-row {
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 12.5px;
+}
+.alloc-row[data-cash] { background: var(--sunken); }
+.alloc-row .nm { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.alloc-row .nm .logo { flex: none; }
+.alloc-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.alloc-nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.alloc-cause {
+  flex: none;
+  padding: 1.5px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.alloc-cause.miss  { background: var(--gain-bg); color: var(--gain); }
+.alloc-cause.short { background: var(--status-buying-bg); color: var(--status-buying); }
+.alloc-cause.drift { background: var(--chip-bg); color: var(--chip-ink); }
+.alloc-cause.ok    { background: var(--status-done-bg); color: var(--status-done); }
+
+.alloc-mp { color: var(--muted); text-align: right; }
+.alloc-ap { font-weight: 700; text-align: right; }
+
+.alloc-gap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.alloc-bar {
+  position: relative;
+  flex: 1;
+  min-width: 42px;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--sunken);
+}
+/* 0 기준선 */
+.alloc-bar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--hairline-2);
+}
+.alloc-bar i {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 3px;
+}
+.alloc-bar i[data-dir="over"]  { background: var(--s3); }
+.alloc-bar i[data-dir="under"] { background: var(--s2); }
+.alloc-gapn { flex: none; font-size: 11px; font-weight: 700; min-width: 50px; text-align: right; }
+.alloc-gapn.over  { color: var(--s3); }
+.alloc-gapn.under { color: var(--s2); }
+.alloc-short { flex: none; font-size: 10.5px; color: var(--muted); }
+
+.alloc-share { text-align: right; line-height: 1.35; }
+.alloc-share b { font-size: 12px; font-weight: 700; }
+.alloc-share b.gain { color: var(--gain); }
+.alloc-share b.loss { color: var(--loss); }
+.alloc-pnl { display: block; font-size: 10.5px; color: var(--muted); }
+
+.alloc-foot {
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  /* 좁은 화면에선 막대만 접는다. 괴리와 기여도는 이 표의 본론이라 남긴다. */
+  .alloc-head,
+  .alloc-row {
+    grid-template-columns: minmax(0, 1fr) 42px 42px 56px 58px;
+    gap: 7px;
+    font-size: 12px;
+  }
+  .alloc-bar, .alloc-short { display: none; }
+  .alloc-gap { justify-content: flex-end; }
+  .alloc-gapn { min-width: 0; font-size: 10.5px; }
+  .alloc-share b { font-size: 11px; }
+  .alloc-pnl { display: none; }
+  /* 로고를 접어 원인 알약 자리를 확보한다 — 괴리의 원인이 이 표의 핵심이라 */
+  .alloc-row .nm .logo { display: none; }
+  .alloc-cause { font-size: 9.5px; padding: 1px 4px; }
+}

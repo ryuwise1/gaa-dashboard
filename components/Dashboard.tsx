@@ -21,11 +21,12 @@ import Calendar from "@/components/Calendar";
 import MeetingNotes from "@/components/MeetingNotes";
 import RangeChart from "@/components/RangeChart";
 import DailySignals from "@/components/DailySignals";
+import Allocation from "@/components/Allocation";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
 
-type Tab = "보유 현황" | "매수·매도 플랜" | "매매 내역" | "오늘의 분석" | "캘린더" | "회의록" | "보유 비중";
+type Tab = "보유 현황" | "매수·매도 플랜" | "AP·MP" | "매매 내역" | "오늘의 분석" | "캘린더" | "회의록" | "보유 비중";
 type Figure = "현재가" | "평가금";
 type Sort = "평가금액" | "수익률" | "당일";
 
@@ -263,13 +264,14 @@ export default function Dashboard() {
   // 공개판(선배 공지용)은 열람 화면만: 보유 현황·플랜·매매 내역·비중.
   // 캘린더(담당자 표 생성기 포함)·회의록·주간보고는 팀 관리 도구라 팀 모드 전용.
   const TABS: Tab[] = [
-    "보유 현황", "매수·매도 플랜", "매매 내역",
+    "보유 현황", "매수·매도 플랜", "AP·MP", "매매 내역",
     ...(teamMode ? (["오늘의 분석", "캘린더", "회의록"] as Tab[]) : []),
     "보유 비중",
   ];
   const tabCount: Record<Tab, string> = {
     "보유 현황": `${rows.length}`,
     "매수·매도 플랜": `${HOLDINGS.positions.filter((p) => p.targetUsd > 0).length}`,
+    "AP·MP": "",
     "매매 내역": `${TRADES.length}`,
     "오늘의 분석": "",
     "캘린더": "",
@@ -798,6 +800,8 @@ export default function Dashboard() {
               ))}
             </section>
           )}
+
+          {tab === "AP·MP" && <Allocation rows={rows} unit={unit} usdkrw={fx} />}
 
           {tab === "매매 내역" && <TradeLog unit={unit} usdkrw={fx} />}
 
