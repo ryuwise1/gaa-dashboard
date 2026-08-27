@@ -74,7 +74,7 @@ export default function Donut({ segments, hovered, onHover, centerLabel, centerV
             <text x="50%" y="54%" textAnchor="middle" className="donut-center-value num">
               {(active.pct * 100).toFixed(1)}%
             </text>
-            <text x="50%" y="62%" textAnchor="middle" className="donut-center-sub" fill="var(--ink-2)">
+            <text x="50%" y="62%" textAnchor="middle" className="donut-center-sub">
               ${Math.round(active.value).toLocaleString("en-US")}
             </text>
           </>

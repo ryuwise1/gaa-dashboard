@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // GAA_DASH_PASSWORD 환경변수가 설정돼 있으면 전체 페이지에 간단한 비밀번호 잠금을 건다.
 // (아이디는 아무거나, 비밀번호만 검사)
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const pass = process.env.GAA_DASH_PASSWORD;
   if (!pass) return NextResponse.next();
 
