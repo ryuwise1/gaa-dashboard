@@ -22,6 +22,7 @@ import MeetingNotes from "@/components/MeetingNotes";
 import RangeChart from "@/components/RangeChart";
 import DailySignals from "@/components/DailySignals";
 import Allocation from "@/components/Allocation";
+import ChangeLog from "@/components/ChangeLog";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
@@ -819,6 +820,8 @@ export default function Dashboard() {
             valueUsd={totals.valueUsd}
             costUsd={totals.costUsd}
           />}
+
+          {teamMode && <ChangeLog />}
 
           <footer className="footer">
             시세는 국내 종목이 네이버 실시간, 해외·환율·지표가 Yahoo Finance입니다. 거래소에 따라 최대 15~20분 지연될 수 있고 {anyOpen ? "1분" : "5분"}마다 자동 갱신됩니다.

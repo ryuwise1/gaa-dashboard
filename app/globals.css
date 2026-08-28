@@ -1085,6 +1085,26 @@ a { color: var(--accent); }
   margin: 3px 0 0; font-size: 10.5px; color: var(--muted); line-height: 1.5;
 }
 
+/* ── 보드 변경 로그 (팀 전용) — GitHub 커밋 창 ── */
+.chlog { margin: 18px 0 0; font-size: 11.5px; color: var(--muted); }
+.chlog summary {
+  cursor: pointer; list-style: none; display: inline-flex; align-items: baseline; gap: 8px;
+  font-weight: 700; color: var(--ink-2); user-select: none; -webkit-user-select: none;
+}
+.chlog summary::-webkit-details-marker { display: none; }
+.chlog summary::after { content: "▾"; font-size: 9px; opacity: 0.7; }
+.chlog[open] summary::after { transform: rotate(180deg); }
+.chlog-sub { font-weight: 500; color: var(--muted); font-size: 10.5px; }
+.chlog ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.chlog li { display: flex; gap: 8px; align-items: baseline; min-width: 0; }
+.chlog li .d { flex: none; font-size: 10.5px; }
+.chlog li a {
+  color: var(--ink-2); text-decoration: none; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.chlog li a:hover { text-decoration: underline; }
+.chlog-empty, .chlog-foot { margin: 8px 0 0; font-size: 10.5px; opacity: 0.85; }
+
 /* 지표 설명 — 기본 접힘. 카드가 설명문으로 어수선해지지 않게 */
 .metric-notes { margin-top: 7px; font-size: 10.5px; color: var(--muted); }
 .metric-notes summary {
