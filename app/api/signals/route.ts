@@ -19,19 +19,26 @@ interface StockSignal {
   score: number; label: "강세" | "중립" | "약세";
   close: number; chg1d: number | null; rsi: number | null;
   reasons: Reason[];
+  /** 리서치 노트 요지 (원문은 리포 research/{티커}.md) */
+  thesis?: string;
 }
 
 /**
- * 미보유 관심 종목 — 보유 섹터에 직접 물리는 이웃들.
+ * 미보유 관심 종목 — 보유 섹터에 직접 물리는 이웃들 + 외부 리서치 노트로 들어온 종목.
  * 같은 야후 일봉이면 어떤 티커든 분석되므로 데이터 부담은 없다.
+ * thesis가 있는 종목은 원문 리서치가 리포 research/{티커}.md에 있다 (8/27~28 반입).
  */
-const WATCH: { ticker: string; name: string; tag: string }[] = [
+const WATCH: { ticker: string; name: string; tag: string; thesis?: string }[] = [
   { ticker: "NVDA", name: "NVIDIA", tag: "반도체·AI" },
   { ticker: "TSM", name: "TSMC", tag: "반도체·AI" },
   { ticker: "AVGO", name: "Broadcom", tag: "반도체·AI" },
   { ticker: "AMD", name: "AMD", tag: "반도체·AI" },
   { ticker: "MU", name: "Micron", tag: "반도체·AI" },
   { ticker: "ASML", name: "ASML", tag: "반도체·AI" },
+  {
+    ticker: "MRVL", name: "Marvell", tag: "반도체·AI",
+    thesis: "커스텀 XPU·어태치 풀스택 — FY28 가이던스는 확정 수주만 반영, 스케일업 스위칭·신규 수주는 전부 상방. CXL은 메모리 사이클의 2차 수혜 경로",
+  },
   { ticker: "GOOGL", name: "Alphabet", tag: "빅테크" },
   { ticker: "AMZN", name: "Amazon", tag: "빅테크" },
   { ticker: "ORCL", name: "Oracle", tag: "빅테크" },
@@ -39,6 +46,18 @@ const WATCH: { ticker: string; name: string; tag: string }[] = [
   { ticker: "SLB", name: "SLB", tag: "에너지" },
   { ticker: "GS", name: "Goldman Sachs", tag: "금융" },
   { ticker: "MS", name: "Morgan Stanley", tag: "금융" },
+  {
+    ticker: "RBRK", name: "Rubrik", tag: "보안·복원",
+    thesis: "백업이 아니라 '되돌릴 수 있는 상태'를 판다 — AI 에이전트 확산이 롤백 수요를 만든다는 논지. 성장률 둔화(51→39%)와 마진 전환(기여마진 −3%→13%)이 공존",
+  },
+  {
+    ticker: "CRWD", name: "CrowdStrike", tag: "사이버보안",
+    thesis: "AI 도입이 보안 현대화 사이클 점화 — 순신규 ARR +51% 사상 최대, 기저효과 가설 반증. Flex는 할인이 아니라 재약정 상승 사다리(전환 +40%·re-Flex +25%)",
+  },
+  {
+    ticker: "ALM", name: "Almonty", tag: "텅스텐·전략자원",
+    thesis: "비중국 텅스텐 P 사이클 — APT +579%, 매출 +498%, GTP 오프테이크 기간+6y·물량+40%. 상동광산 램프업은 3Q26 실적(11월)이 최초 검증",
+  },
 ];
 interface MarketItem { name: string; value: string; note: string; good: boolean | null }
 
@@ -187,7 +206,7 @@ export async function GET() {
     if (!xs) continue;
     const a = analyzeStock(xs);
     if (!a) continue;
-    watch.push({ ticker: w.ticker, name: w.name, sector: w.tag, status: "관심", ...a });
+    watch.push({ ticker: w.ticker, name: w.name, sector: w.tag, status: "관심", thesis: w.thesis, ...a });
   }
   watch.sort((a, b) => b.score - a.score);
 

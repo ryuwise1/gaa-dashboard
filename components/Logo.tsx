@@ -17,6 +17,7 @@ const CDN: Record<string, string> = {
   // 오늘의 분석 관심 종목 (미보유) — 토스 CDN에 존재 확인된 미국 대형주
   NVDA: "NVDA", TSM: "TSM", AVGO: "AVGO", AMD: "AMD", MU: "MU", ASML: "ASML",
   GOOGL: "GOOGL", AMZN: "AMZN", ORCL: "ORCL", COP: "COP", SLB: "SLB", GS: "GS", MS: "MS",
+  MRVL: "MRVL", RBRK: "RBRK", CRWD: "CRWD", // ALM(Almonty)은 토스 CDN 미확인 — 모노그램 폴백
 };
 
 /** 모노그램에 쓸 짧은 글자 — 로고가 없는 종목용 */

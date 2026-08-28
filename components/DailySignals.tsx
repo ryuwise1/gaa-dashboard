@@ -10,6 +10,8 @@ interface StockSignal {
   score: number; label: "강세" | "중립" | "약세";
   close: number; chg1d: number | null; rsi: number | null;
   reasons: Reason[];
+  /** 리서치 노트 요지 (원문: 리포 research/{티커}.md) */
+  thesis?: string;
 }
 interface MarketItem { name: string; value: string; note: string; good: boolean | null }
 interface SignalsResp {
@@ -39,6 +41,7 @@ function SigRow({ s, idx }: { s: StockSignal; idx: number }) {
             <i key={i} className={r.good ? "good" : "bad"}>{r.t}</i>
           ))}
         </div>
+        {s.thesis && <p className="sig-thesis">{s.thesis}</p>}
       </div>
       <div className="sig-nums num">
         {s.chg1d != null && (
@@ -122,7 +125,7 @@ export default function DailySignals() {
         <div className="sig-group sig-watch">
           <div className="sig-group-head">
             <h3><span className="sig-badge">관심</span>미보유 관심 종목 <span className="cnt num">{data.watch.length}</span></h3>
-            <p>보유 섹터에 물리는 이웃 종목 — 같은 규칙으로 계산한 참고 시그널</p>
+            <p>보유 섹터에 물리는 이웃 종목 — 같은 규칙으로 계산한 참고 시그널. 회색 문장은 반입한 리서치 노트의 요지입니다 (원문: 리포 research 폴더)</p>
           </div>
           {data.watch.map((s, i) => <SigRow key={s.ticker} s={s} idx={i} />)}
         </div>
