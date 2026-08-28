@@ -263,7 +263,7 @@ export default function Calendar() {
       {view === "주간" && builder && week != null && (
         <div className="cal-builder">
           <p className="cal-builder-hint">
-            날짜별 담당자를 적고 <b>표 복사</b>를 누르면 회의 자료용 표가 클립보드에 담겨요.
+            날짜별 담당자를 적고 <b>표 복사</b>를 누르면 회의 자료용 표가 클립보드에 담깁니다.
             노션·워드에는 표 그대로, 카톡에는 텍스트로 붙습니다. 담당자는 이 브라우저에 저장됩니다.
           </p>
           {week.map((d) => {

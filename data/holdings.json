@@ -2,7 +2,7 @@
   "meta": {
     "team": "GLIF 26-2 자산운용팀",
     "targetTotalUsd": 500000,
-    "updatedAt": "2026-08-26",
+    "updatedAt": "2026-08-27",
     "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48"
   },
   "positions": [
@@ -95,10 +95,12 @@
       "name": "HP",
       "sector": "메모리 역상관",
       "targetWeight": 0.025,
+      "qty": 421,
+      "avgPrice": 29.63,
       "targetUsd": 12500,
       "currency": "USD",
       "yahoo": "HPQ",
-      "status": "미매수"
+      "status": "매수완료"
     },
     {
       "ticker": "AAPL",
