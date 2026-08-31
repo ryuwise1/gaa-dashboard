@@ -55,12 +55,10 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   if (cur?.benchUsd != null && cur?.spxPct != null) {
     const vsAum = cur.totalUsd / AUM_USD - 1;
     const alpha = vsAum - (cur.benchUsd / AUM_USD - 1);
-    const vsIndex = vsAum - cur.spxPct;
     const pp = (n: number) => `${n >= 0 ? "+" : "-"}${Math.abs(n * 100).toFixed(1)}%p ${n >= 0 ? "상회" : "하회"}`;
     L.push("■ 벤치마크 비교 (S&P 500)");
     L.push(`운용 개시 후 총자산 ${pct(vsAum)} / S&P 500 ${pct(cur.spxPct)}`);
-    L.push(`- 동일 현금흐름 기준 ${pp(alpha)} — 우리와 같은 날짜·금액으로 지수를 분할 매수했다고 가정한 비교입니다 (종목 선택 성과)`);
-    L.push(`- 지수 등락 기준 ${pp(vsIndex)} — 개시 후 지수 상승률과의 단순 비교로, 현금 보유 비용이 포함된 값입니다`);
+    L.push(`벤치마크 대비 ${pp(alpha)} — PME(Public Market Equivalent) 방식으로 산정`);
     L.push("");
   }
 
