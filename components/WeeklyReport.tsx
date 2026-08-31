@@ -10,11 +10,10 @@ interface MeetingNote { no: number; date: string; title: string; agenda: string[
 const NOTES = (notesJson as { notes: MeetingNote[] }).notes;
 const NAME_OF = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
 
-/** 긴 문장을 개조식 한 줄로 — 첫 문장까지, 너무 길면 자른다 */
-function clip(s: string, max = 90): string {
-  const first = s.split(". ")[0];
-  const t = first.length > max ? first.slice(0, max).trimEnd() + "…" : first;
-  return t.endsWith(".") ? t.slice(0, -1) : t;
+/** 개조식 한 줄 — 첫 문장까지만 쓰되, 문장 중간에서는 절대 자르지 않는다 */
+function clip(s: string): string {
+  const first = s.split(/\.\s+/)[0];
+  return first.replace(/\.$/, "");
 }
 
 interface Props {
@@ -87,7 +86,7 @@ function build({ rows, quotes, valueUsd, costUsd }: Props): string {
     for (const t of [...recent].sort((a, b) => a.date.localeCompare(b.date))) {
       const [, m, d] = t.date.split("-").map(Number);
       const src = t.meeting ? `${t.meeting}차 회의 결정` : "수시 집행";
-      const why = t.note ? ` — ${clip(t.note.replace(/^수시 집행 \(정기회의 외\) — /, ""), 55)}` : "";
+      const why = t.note ? ` — ${clip(t.note.replace(/^수시 집행 \(정기회의 외\) — /, ""))}` : "";
       L.push(`- ${m}/${d} ${NAME_OF.get(t.ticker) ?? t.ticker} ${t.qty.toLocaleString()}주 ${t.side} @ ${fmtLocalPrice(t.currency, t.price)} (${src})${why}`);
     }
   }
@@ -101,7 +100,7 @@ function build({ rows, quotes, valueUsd, costUsd }: Props): string {
     L.push("■ 회의 요약");
     for (const n of past) {
       const [, m, d] = n.date.split("-").map(Number);
-      L.push(`- ${n.no}차(${m}/${d}) ${n.title}: ${clip(n.decisions, 110)}`);
+      L.push(`- ${n.no}차(${m}/${d}) ${n.title}: ${clip(n.decisions)}`);
     }
     if (next) {
       const [, m, d] = next.date.split("-").map(Number);
