@@ -56,9 +56,8 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
     const vsAum = cur.totalUsd / AUM_USD - 1;
     const alpha = vsAum - (cur.benchUsd / AUM_USD - 1);
     const pp = (n: number) => `${n >= 0 ? "+" : "-"}${Math.abs(n * 100).toFixed(1)}%p ${n >= 0 ? "상회" : "하회"}`;
-    L.push("■ 벤치마크 비교 (S&P 500)");
-    L.push(`운용 개시 후 총자산 ${pct(vsAum)} / S&P 500 ${pct(cur.spxPct)}`);
-    L.push(`벤치마크 대비 ${pp(alpha)} — PME(Public Market Equivalent) 방식으로 산정`);
+    L.push("■ 벤치마크 비교");
+    L.push(`운용 개시 후 총자산 ${pct(vsAum)} — PME 방식 벤치마크(S&P 500) 대비 ${pp(alpha)}`);
     L.push("");
   }
 
