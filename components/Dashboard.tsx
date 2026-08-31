@@ -838,6 +838,7 @@ export default function Dashboard() {
             quotes={quotes}
             valueUsd={totals.valueUsd}
             costUsd={totals.costUsd}
+            history={history}
           />}
 
           {teamMode && <ChangeLog />}

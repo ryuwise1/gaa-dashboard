@@ -21,12 +21,14 @@ interface Props {
   quotes: QuoteMap;
   valueUsd: number;
   costUsd: number;
+  /** 총자산 추이 — 벤치마크 비교 블록용 (Dashboard의 /api/history 결과) */
+  history?: { date: string; totalUsd: number; benchUsd?: number | null; spxPct?: number | null }[];
 }
 
 const pct = (n: number, d = 1) => (n >= 0 ? "+" : "-") + Math.abs(n * 100).toFixed(d) + "%";
 
 /** 카톡에 그대로 붙여넣는 주간 운용보고 초안을 만든다. 숫자는 화면과 같은 소스에서 나온다. */
-function build({ rows, quotes, valueUsd, costUsd }: Props): string {
+function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   const today = new Date();
   const stamp = `${today.getMonth() + 1}/${today.getDate()}`;
   const L: string[] = [];
@@ -47,6 +49,20 @@ function build({ rows, quotes, valueUsd, costUsd }: Props): string {
   }).filter(Boolean);
   if (macro.length) L.push(macro.join(" | "));
   L.push("");
+
+  // ── 벤치마크 비교 — 화면(추이 카드)과 같은 두 기준을 병기한다
+  const cur = history?.[history.length - 1];
+  if (cur?.benchUsd != null && cur?.spxPct != null) {
+    const vsAum = cur.totalUsd / AUM_USD - 1;
+    const alpha = vsAum - (cur.benchUsd / AUM_USD - 1);
+    const vsIndex = vsAum - cur.spxPct;
+    const pp = (n: number) => `${n >= 0 ? "+" : "-"}${Math.abs(n * 100).toFixed(1)}%p ${n >= 0 ? "상회" : "하회"}`;
+    L.push("■ 벤치마크 비교 (S&P 500)");
+    L.push(`운용 개시 후 총자산 ${pct(vsAum)} / S&P 500 ${pct(cur.spxPct)}`);
+    L.push(`- 동일 현금흐름 기준 ${pp(alpha)} — 우리와 같은 날짜·금액으로 지수를 분할 매수했다고 가정한 비교입니다 (종목 선택 성과)`);
+    L.push(`- 지수 등락 기준 ${pp(vsIndex)} — 개시 후 지수 상승률과의 단순 비교로, 현금 보유 비용이 포함된 값입니다`);
+    L.push("");
+  }
 
   L.push("■ 종목별 수익률 (비중 - 주식 평가금액 기준)");
   const sortable = rows
