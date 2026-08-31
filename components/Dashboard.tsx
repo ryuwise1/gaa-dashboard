@@ -23,6 +23,7 @@ import RangeChart from "@/components/RangeChart";
 import DailySignals from "@/components/DailySignals";
 import Allocation from "@/components/Allocation";
 import ChangeLog from "@/components/ChangeLog";
+import StoryBlock from "@/components/StoryBlock";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
@@ -57,6 +58,8 @@ export default function Dashboard() {
   const [figure, setFigure] = useState<Figure>("평가금");
   const [sort, setSort] = useState<Sort>("평가금액");
   const [bench, setBench] = useState<BenchRow[]>([]);
+  // 플랜 탭에서 행을 누르면 그 종목의 매수 근거(why)가 펼쳐진다
+  const [planWhy, setPlanWhy] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
   // 팀 전용 모드 — 회의록 탭과 주간보고 초안이 여기 묶인다.
   // ?team(또는 기존 ?report)으로 한 번 들어오면 이 브라우저에 저장돼 계속 보인다.
@@ -553,6 +556,7 @@ export default function Dashboard() {
 
           {tab === "보유 현황" && (
             <section className="section" role="tabpanel" aria-label="보유 현황">
+              <StoryBlock />
               <div className="section-head">
                 <h2 className="sr-only">보유 현황</h2>
                 <span className="meta num">{rows.length > 0 ? quoteNote : ""}</span>
@@ -769,32 +773,47 @@ export default function Dashboard() {
                     const showGap = gap > 500 && p.status !== "매수완료";
                     const pxUsd = row && row.valueUsd != null && row.qty > 0 ? row.valueUsd / row.qty : null;
                     const shares = showGap && pxUsd ? Math.floor(gap / pxUsd) : null;
+                    const whyOpen = planWhy === p.ticker;
                     return (
-                      <div key={p.ticker} className="plan-row">
-                        <span className="nm">
-                          <Logo ticker={p.ticker} name={p.name} color={tickerColorVar(p.ticker, HOLDINGS.positions.indexOf(p))} size={22} />
-                          <span className="plan-nm">{p.name}</span>
-                          <span className="tk">{p.ticker}</span>
-                        </span>
-                        {statusPill(p.status)}
-                        {/* %는 진행 중일 때만 — 완료·미매수는 알약이 이미 말하고 있어 반복하지 않는다 */}
-                        <span className="bar-wrap">
-                          <span className="bar" role="progressbar" aria-valuenow={Math.round(prog * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`${p.name} 매수 진행률`}>
-                            <i data-done={done} style={{ width: `${prog * 100}%` }} />
+                      <Fragment key={p.ticker}>
+                        <div
+                          className="plan-row"
+                          data-clickable={!!p.why || undefined}
+                          data-open={whyOpen || undefined}
+                          role={p.why ? "button" : undefined}
+                          tabIndex={p.why ? 0 : undefined}
+                          onClick={() => p.why && setPlanWhy(whyOpen ? null : p.ticker)}
+                          onKeyDown={(e) => {
+                            if (p.why && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setPlanWhy(whyOpen ? null : p.ticker); }
+                          }}
+                        >
+                          <span className="nm">
+                            <Logo ticker={p.ticker} name={p.name} color={tickerColorVar(p.ticker, HOLDINGS.positions.indexOf(p))} size={22} />
+                            <span className="plan-nm">{p.name}</span>
+                            <span className="tk">{p.ticker}</span>
+                            {p.why && <i className="plan-caret" aria-hidden>▾</i>}
                           </span>
-                          <b className={`bar-pct num${prog >= 1 ? " full" : prog === 0 ? " zero" : ""}`}>
-                            {Math.round(prog * 100)}%
-                          </b>
-                        </span>
-                        <span className="tgt num">
-                          {fmtUsd(p.targetUsd)}
-                          {showGap && (
-                            <span className="plan-gap" title={shares != null ? "잔여 목표를 현재가로 환산한 수량" : "시세 없음 — 잔여 금액만"}>
-                              잔여 {fmtUsd(gap)}{shares != null && shares > 0 ? ` ≈ ${shares.toLocaleString()}주` : ""}
+                          {statusPill(p.status)}
+                          {/* %는 진행 중일 때만 — 완료·미매수는 알약이 이미 말하고 있어 반복하지 않는다 */}
+                          <span className="bar-wrap">
+                            <span className="bar" role="progressbar" aria-valuenow={Math.round(prog * 100)} aria-valuemin={0} aria-valuemax={100} aria-label={`${p.name} 매수 진행률`}>
+                              <i data-done={done} style={{ width: `${prog * 100}%` }} />
                             </span>
-                          )}
-                        </span>
-                      </div>
+                            <b className={`bar-pct num${prog >= 1 ? " full" : prog === 0 ? " zero" : ""}`}>
+                              {Math.round(prog * 100)}%
+                            </b>
+                          </span>
+                          <span className="tgt num">
+                            {fmtUsd(p.targetUsd)}
+                            {showGap && (
+                              <span className="plan-gap" title={shares != null ? "잔여 목표를 현재가로 환산한 수량" : "시세 없음 — 잔여 금액만"}>
+                                잔여 {fmtUsd(gap)}{shares != null && shares > 0 ? ` ≈ ${shares.toLocaleString()}주` : ""}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        {whyOpen && p.why && <p className="plan-why">{p.why}</p>}
+                      </Fragment>
                     );
                   })}
                 </div>

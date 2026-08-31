@@ -14,6 +14,8 @@ export interface Position {
   status: "미매수" | "매수중" | "매수완료" | "매도";
   qty?: number;
   avgPrice?: number;
+  /** 이 종목을 왜 담는가 — 플랜 탭에서 행을 누르면 보이는 매수 근거 */
+  why?: string;
 }
 
 export interface Quote {
