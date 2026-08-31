@@ -1,9 +1,21 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { HOLDINGS, SECTOR_ORDER, fmtUsd, type HoldingRow, type QuoteMap } from "@/lib/portfolio";
+import { HOLDINGS, SECTOR_ORDER, fmtLocalPrice, fmtUsd, type HoldingRow, type QuoteMap } from "@/lib/portfolio";
 import { MACRO, fmtMacro } from "@/lib/macro";
-import { AUM_USD, cashUsd, realizedUsd } from "@/lib/trades";
+import { AUM_USD, TRADES, cashUsd, realizedUsd } from "@/lib/trades";
+import notesJson from "@/data/meeting-notes.json";
+
+interface MeetingNote { no: number; date: string; title: string; agenda: string[]; decisions: string }
+const NOTES = (notesJson as { notes: MeetingNote[] }).notes;
+const NAME_OF = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
+
+/** 긴 문장을 개조식 한 줄로 — 첫 문장까지, 너무 길면 자른다 */
+function clip(s: string, max = 90): string {
+  const first = s.split(". ")[0];
+  const t = first.length > max ? first.slice(0, max).trimEnd() + "…" : first;
+  return t.endsWith(".") ? t.slice(0, -1) : t;
+}
 
 interface Props {
   rows: HoldingRow[];
@@ -65,9 +77,38 @@ function build({ rows, quotes, valueUsd, costUsd }: Props): string {
   for (let i = 0; i < secLines.length; i += 2) L.push(secLines.slice(i, i + 2).join(" | "));
   L.push("");
 
-  L.push("■ 이번 주 주요 액션");
-  L.push("(회의에서 결정한 매매와 근거를 여기에 적어주세요)");
+  // ── 이번 주 체결 — 원장에서 최근 7일 치를 그대로 가져와 개조식으로
+  L.push("■ 이번 주 매매");
+  const cutoff = Date.now() - 7 * 86400_000;
+  const recent = TRADES.filter((t) => Date.parse(t.date + "T00:00:00+09:00") >= cutoff);
+  if (recent.length === 0) {
+    L.push("- 신규 체결 없음 (기존 포지션 유지)");
+  } else {
+    for (const t of [...recent].sort((a, b) => a.date.localeCompare(b.date))) {
+      const [, m, d] = t.date.split("-").map(Number);
+      const src = t.meeting ? `${t.meeting}차 회의 결정` : "수시 집행";
+      const why = t.note ? ` — ${clip(t.note.replace(/^수시 집행 \(정기회의 외\) — /, ""), 55)}` : "";
+      L.push(`- ${m}/${d} ${NAME_OF.get(t.ticker) ?? t.ticker} ${t.qty.toLocaleString()}주 ${t.side} @ ${fmtLocalPrice(t.currency, t.price)} (${src})${why}`);
+    }
+  }
   L.push("");
+
+  // ── 회의 요약 — 최근 회의의 결정과 차기 안건을 자동으로 붙인다
+  const todayIso = new Date(Date.now() + 9 * 3600_000).toISOString().slice(0, 10);
+  const past = NOTES.filter((n) => n.date <= todayIso && Date.parse(n.date + "T00:00:00+09:00") >= cutoff - 3 * 86400_000);
+  const next = NOTES.find((n) => n.date > todayIso);
+  if (past.length || next) {
+    L.push("■ 회의 요약");
+    for (const n of past) {
+      const [, m, d] = n.date.split("-").map(Number);
+      L.push(`- ${n.no}차(${m}/${d}) ${n.title}: ${clip(n.decisions, 110)}`);
+    }
+    if (next) {
+      const [, m, d] = next.date.split("-").map(Number);
+      L.push(`- 차기 ${next.no}차(${m}/${d}) 예정 — ${next.title.replace(/ ?\(안건지\)/, "")} 등 안건 ${next.agenda.length}건`);
+    }
+    L.push("");
+  }
   L.push("■ 리스크 관리");
   const over = SECTOR_ORDER.map((s) => {
     const tgt = HOLDINGS.positions.filter((p) => p.sector === s).reduce((x, p) => x + p.targetUsd, 0);
@@ -75,7 +116,7 @@ function build({ rows, quotes, valueUsd, costUsd }: Props): string {
     const curPctAum = ((bySector.get(s) ?? 0) / AUM_USD) * 100;
     const tgtPct = (tgt / AUM_USD) * 100;
     return curPctAum > tgtPct * 1.1
-      ? `- ${s} ${curPctAum.toFixed(1)}% (목표 ${tgtPct.toFixed(1)}%, +${(((curPctAum / tgtPct) - 1) * 100).toFixed(0)}% 이탈) — 트림 여부 검토 필요`
+      ? `- ${s} ${curPctAum.toFixed(1)}% (목표 ${tgtPct.toFixed(1)}%, +${(((curPctAum / tgtPct) - 1) * 100).toFixed(0)}% 이탈) — 비중 축소 검토 대상`
       : null;
   }).filter(Boolean) as string[];
   L.push(...(over.length ? over : ["- 목표 비중을 크게 벗어난 섹터 없음"]));
@@ -116,7 +157,8 @@ export default function WeeklyReport(props: Props) {
         </div>
       </div>
       <p className="wr-hint">
-        현재 시세로 포트폴리오 현황·종목별 수익률·섹터 비중을 자동으로 채웁니다. 이번 주 액션과 논거만 직접 적으면 됩니다.
+        시세·체결 원장·회의록에서 현황, 이번 주 매매, 회의 결정·차기 안건까지 자동으로 채워집니다.
+        보내기 전에 한 번 읽고 필요한 부분만 다듬으면 됩니다.
       </p>
       {show && <pre className="wr-pre">{text}</pre>}
     </section>
