@@ -2,7 +2,7 @@
   "meta": {
     "team": "GLIF 26-2 자산운용팀",
     "targetTotalUsd": 500000,
-    "updatedAt": "2026-08-27",
+    "updatedAt": "2026-09-07",
     "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48"
   },
   "positions": [
@@ -67,7 +67,7 @@
       "currency": "KRW",
       "yahoo": "005930.KS",
       "status": "매수완료",
-      "qty": 103,
+      "qty": 79,
       "avgPrice": 207337,
       "why": "메모리 공급 측 편입 종목입니다. HBM 추격과 파운드리 수주 회복, 반도체 수출 개선의 직접 수혜를 기대했습니다."
     },
@@ -80,7 +80,7 @@
       "currency": "KRW",
       "yahoo": "000660.KS",
       "status": "매수완료",
-      "qty": 15,
+      "qty": 12,
       "avgPrice": 1393500,
       "why": "핵심 투자 논지의 중심 종목입니다. HBM 시장 1위로서 AI 데이터센터 수요 병목의 최대 수혜 기업으로 판단했습니다."
     },
@@ -210,7 +210,7 @@
       "status": "매수완료",
       "qty": 795,
       "avgPrice": 47.1967,
-      "why": "유럽 재무장 사이클이 장기화될 것으로 판단했습니다. 개별 종목의 거래 제약으로 Airbus·BAE·Thales·Rheinmetall을 포괄하는 ETF로 편입했습니다."
+      "why": "유럽 재무장 사이클이 장기화될 것으로 판단했습니다. 개별 종목의 거래 제약으로 Airbus·BAE·Thales·Rheinmetall을 포괄하는 ETF로 편입했습니다. 9/7 우크라이나 휴전 협상 진전으로 재무장 촉매가 약화되어 절반 축소를 결정했으며, 9/8 미국장 개장 시 집행 예정입니다."
     },
     {
       "ticker": "TLT",
