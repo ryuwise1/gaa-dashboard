@@ -89,7 +89,7 @@ export default function Dashboard() {
     // 비밀번호는 코드에 해시로만 둔다 — 변경 시 CLAUDE.md의 해시 생성법 참조
     const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(gatePw.trim()));
     const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
-    if (hex === "85d61d3932d27e041d211bae80cad22fa874366b801ce3eebf9728530000a356") {
+    if (hex === "23ffea5c8312b24880f4eaddda98e2658a976163a60adb9dc34fc86a6c1a1c70") {
       localStorage.setItem("gaa-team", "on");
       setTeamMode(true);
       setTeamGate(false);
