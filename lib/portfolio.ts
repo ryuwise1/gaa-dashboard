@@ -194,7 +194,7 @@ export function buildTotals(rows: HoldingRow[], quotes: QuoteMap): Totals {
 
 /* ── 색 배정: 색은 순위가 아니라 종목(엔티티)을 따라간다 ─────────────── */
 
-const SERIES = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"] as const;
+const SERIES = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"] as const;
 
 const TICKER_SLOT: Record<string, number> = {
   MSFT: 0, META: 1, INTC: 2, "005930": 3, "000660": 4, QCOM: 5,
@@ -206,12 +206,12 @@ export function tickerColorVar(ticker: string, fallbackIndex: number): string {
 }
 
 const SECTOR_SLOT: Record<string, number> = {
-  "코어 인덱스": 0, "AI CapEx": 1, "메모리 역상관": 2, "에너지": 3,
+  "코어 인덱스": 0, "AI CapEx": 1, "AI 보안": 8, "메모리 역상관": 2, "에너지": 3,
   "유럽 방산": 4, "금리 (인하)": 5, "금리 (인상)": 6, "현금": 7,
 };
 
 export function sectorColorVar(sector: string): string {
-  return `var(--${SERIES[(SECTOR_SLOT[sector] ?? 0) % 8]})`;
+  return `var(--${SERIES[(SECTOR_SLOT[sector] ?? 0) % SERIES.length]})`;
 }
 
 export const SECTOR_ORDER = Object.keys(SECTOR_SLOT);

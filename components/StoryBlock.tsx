@@ -13,7 +13,11 @@ import { HOLDINGS } from "@/lib/portfolio";
 const ROLES: { key: string; tone: "alpha" | "hedge" | "div" | "core"; sectors: string[]; line: string }[] = [
   {
     key: "메인 알파", tone: "alpha", sectors: ["AI CapEx"],
-    line: "AI 데이터센터 투자 확대가 메모리 공급 부족으로 이어진다는 판단입니다. 공급 측(삼성전자·SK하이닉스)과 수요 측(MSFT·META)을 함께 편입했습니다",
+    line: "AI 데이터센터 투자 확대가 메모리 공급 부족으로 이어진다는 판단입니다. 공급 측(삼성전자·SK하이닉스)과 수요 측(MSFT·META)을 함께 편입했으며, 9/8 코스피 저항 돌파를 확인하고 SK하이닉스 비중을 상향했습니다",
+  },
+  {
+    key: "알파 ②", tone: "alpha", sectors: ["AI 보안"],
+    line: "AI 도입의 다음 단계 지출인 보안입니다. 탐지 층(CrowdStrike)과 복구 층(Rubrik)으로 나누어 편입하며, GPT-6 Astra의 사이버보안 'Critical' 등급 도달로 촉매가 현실화되었다고 판단했습니다",
   },
   {
     key: "헤지 ①", tone: "hedge", sectors: ["메모리 역상관"],
@@ -25,7 +29,7 @@ const ROLES: { key: string; tone: "alpha" | "hedge" | "div" | "core"; sectors: s
   },
   {
     key: "분산", tone: "div", sectors: ["에너지", "유럽 방산"],
-    line: "에너지 메이저 4종과 유럽 방산(EUAD)으로, 주력 테마와 상관관계가 낮은 자산군입니다",
+    line: "에너지 메이저 4종과 유럽 방산(EUAD)입니다. 방산은 휴전 협상 진전으로 목표를 절반 축소하여 AI 보안으로 로테이션하고 있습니다",
   },
   {
     key: "코어·현금", tone: "core", sectors: ["코어 인덱스", "현금"],
@@ -68,13 +72,17 @@ export default function StoryBlock({ collapsible = false }: { collapsible?: bool
         )}
       </div>
       {!expanded && (
-        <p className="story-thesis dim">핵심 논지: AI 사이클의 <b>메모리 병목</b> — 메인 알파 15% · 헤지 22.5% · 분산 17.5% · 코어·현금 45%</p>
+        <p className="story-thesis dim">
+          핵심 논지: AI 사이클의 <b>메모리 병목</b> + 도입 단계의 <b>보안 지출</b> —{" "}
+          {ROLES.map((r) => `${r.key} ${(weightOf(r.sectors) * 100).toFixed(1).replace(/\.0$/, "")}%`).join(" · ")}
+        </p>
       )}
       {expanded && (
       <>
       <p className="story-thesis">
-        본 포트폴리오의 핵심 투자 논지는 AI 투자 사이클에서 발생하는 <b>메모리 병목</b>입니다.
-        해당 사이클을 공급과 수요 양측에서 매수하고, 반대 국면에 대비한 종목을 함께 편입했으며,
+        본 포트폴리오의 핵심 투자 논지는 AI 투자 사이클에서 발생하는 <b>메모리 병목</b>이며,
+        그 후행 수혜로 <b>AI 보안</b>을 확장 편입했습니다.
+        사이클을 공급과 수요 양측에서 매수하고, 반대 국면에 대비한 종목을 함께 편입했으며,
         금리 리스크는 양방향 포지션으로 중립화했습니다.
       </p>
       <ul className="story-roles">

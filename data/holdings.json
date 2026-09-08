@@ -10,8 +10,8 @@
       "ticker": "VT",
       "name": "Vanguard Total World",
       "sector": "코어 인덱스",
-      "targetWeight": 0.4,
-      "targetUsd": 200000,
+      "targetWeight": 0.3825,
+      "targetUsd": 191250,
       "currency": "USD",
       "yahoo": "VT",
       "status": "매수중",
@@ -67,7 +67,7 @@
       "currency": "KRW",
       "yahoo": "005930.KS",
       "status": "매수완료",
-      "qty": 79,
+      "qty": 103,
       "avgPrice": 207337,
       "why": "메모리 공급 측 편입 종목입니다. HBM 추격과 파운드리 수주 회복, 반도체 수출 개선의 직접 수혜를 기대했습니다."
     },
@@ -80,9 +80,31 @@
       "currency": "KRW",
       "yahoo": "000660.KS",
       "status": "매수완료",
-      "qty": 18,
-      "avgPrice": 1548333,
+      "qty": 21,
+      "avgPrice": 1526214,
       "why": "핵심 투자 논지의 중심 종목입니다. HBM 시장 1위로서 AI 데이터센터 수요 병목의 최대 수혜 기업으로 판단했습니다. 9/8 임시회의에서 코스피 7,000선 재돌파와 저항 돌파를 근거로 목표 비중을 3.0%에서 4.5%로 상향했습니다."
+    },
+    {
+      "ticker": "RBRK",
+      "name": "Rubrik",
+      "sector": "AI 보안",
+      "targetWeight": 0.025,
+      "targetUsd": 12500,
+      "currency": "USD",
+      "yahoo": "RBRK",
+      "status": "미매수",
+      "why": "AI 보안 슬리브의 주력 종목입니다. 에이전트가 실행 권한을 갖는 환경에서 필수가 되는 복구·롤백 인프라를 판매하며, 매출 성장 +38%와 기여마진 흑자 전환을 확인했습니다. GPT-6 Astra의 사이버보안 'Critical' 등급 도달(9/3)로 도입 촉매가 현실화되어 9/8 임시회의에서 편입을 결정했습니다. 1차 절반 매수 후 −5% 눌림 또는 Fal.Con 소화 후 2차를 집행합니다. 반증 조건: 매출 성장률 30% 하회 정착 시 재검토."
+    },
+    {
+      "ticker": "CRWD",
+      "name": "CrowdStrike",
+      "sector": "AI 보안",
+      "targetWeight": 0.015,
+      "targetUsd": 7500,
+      "currency": "USD",
+      "yahoo": "CRWD",
+      "status": "미매수",
+      "why": "AI 보안 슬리브의 보조 종목입니다. EDR 1위로서 보호 대상 단위 과금 구조라 AI 에이전트가 늘수록 과금 단위가 함께 늘어납니다. 순신규 ARR +51%로 성장 재가속을 확인했으나 P/S 40배의 밸류에이션 부담을 감안해 비중을 작게 가져갑니다. 반증 조건: 순신규 ARR이 가이던스 부합에 그치는 분기 2회 연속 시 축소."
     },
     {
       "ticker": "QCOM",
@@ -203,14 +225,14 @@
       "ticker": "EUAD",
       "name": "Select STOXX Europe A&D",
       "sector": "유럽 방산",
-      "targetWeight": 0.075,
-      "targetUsd": 37500,
+      "targetWeight": 0.0375,
+      "targetUsd": 18750,
       "currency": "USD",
       "yahoo": "EUAD",
       "status": "매수완료",
       "qty": 795,
       "avgPrice": 47.1967,
-      "why": "유럽 재무장 사이클이 장기화될 것으로 판단했습니다. 개별 종목의 거래 제약으로 Airbus·BAE·Thales·Rheinmetall을 포괄하는 ETF로 편입했습니다. 9/7 우크라이나 휴전 협상 진전으로 재무장 촉매가 약화되어 절반 축소를 결정했으며, 9/8 미국장 개장 시 집행 예정입니다."
+      "why": "유럽 재무장 사이클이 장기화될 것으로 판단했습니다. 개별 종목의 거래 제약으로 Airbus·BAE·Thales·Rheinmetall을 포괄하는 ETF로 편입했습니다. 우크라이나 휴전 협상 진전과 추세 하방 돌파로 9/8 임시회의에서 목표를 7.5%에서 3.75%로 절반 축소했으며(397주 매도, 미국장 개장 시 집행), 잔여는 협상 번복 가능성에 대비해 유지합니다. 축소분은 AI 보안 슬리브로 로테이션합니다."
     },
     {
       "ticker": "TLT",
