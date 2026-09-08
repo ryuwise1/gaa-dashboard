@@ -24,11 +24,19 @@ import DailySignals from "@/components/DailySignals";
 import Allocation from "@/components/Allocation";
 import ChangeLog from "@/components/ChangeLog";
 import StoryBlock from "@/components/StoryBlock";
+import ActionBar from "@/components/ActionBar";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
 
 type Tab = "보유 현황" | "매수·매도 플랜" | "AP·MP" | "매매 내역" | "오늘의 분석" | "캘린더" | "회의록" | "보유 비중";
+
+// 탭 딥링크 — ?tab=calendar 처럼 특정 탭을 바로 열어 공유할 수 있게 한다
+const TAB_SLUGS: Record<string, Tab> = {
+  holdings: "보유 현황", plan: "매수·매도 플랜", apmp: "AP·MP", trades: "매매 내역",
+  signals: "오늘의 분석", calendar: "캘린더", notes: "회의록",
+};
+const TEAM_ONLY_TABS: Tab[] = ["오늘의 분석", "캘린더", "회의록"];
 type Figure = "현재가" | "평가금";
 type Sort = "평가금액" | "수익률" | "당일";
 
@@ -61,6 +69,8 @@ export default function Dashboard() {
   // 플랜 탭에서 행을 누르면 그 종목의 매수 근거(why)가 펼쳐진다
   const [planWhy, setPlanWhy] = useState<string | null>(null);
   const [legendOpen, setLegendOpen] = useState(false);
+  // 수익 기여 순위 — 기본은 상위 3 + 하위 2, 펼치면 전 종목
+  const [contribOpen, setContribOpen] = useState(false);
   // 팀 전용 모드 — 회의록 탭과 주간보고 초안이 여기 묶인다.
   // ?team(또는 기존 ?report)으로 한 번 들어오면 이 브라우저에 저장돼 계속 보인다.
   // 선배들께 보내는 기본 주소에서는 존재 자체가 안 보인다.
@@ -87,14 +97,28 @@ export default function Dashboard() {
     if (u === "USD") setUnit("USD");
     const fg = localStorage.getItem("gaa-figure");
     if (fg === "현재가") setFigure("현재가");
-    const t = localStorage.getItem("gaa-tab");
-    // 캘린더는 팀 전용이라 복원 시 팀 모드 여부를 함께 본다
+    // 탭 복원 — URL의 ?tab=슬러그가 최우선(공유 링크), 없으면 마지막에 보던 탭.
+    // 팀 전용 탭은 팀 모드일 때만 살린다. "보유 비중"은 모바일 전용이라 복원하지 않는다.
     const team = localStorage.getItem("gaa-team") === "on" || /[?&](team|report)\b/.test(location.search);
-    if (t === "매수·매도 플랜" || t === "매매 내역" || (t === "캘린더" && team)) setTab(t);
+    const slug = new URLSearchParams(location.search).get("tab");
+    const fromUrl = slug ? TAB_SLUGS[slug] : undefined;
+    const savedTab = localStorage.getItem("gaa-tab");
+    const want = fromUrl ?? (Object.values(TAB_SLUGS).includes(savedTab as Tab) ? (savedTab as Tab) : undefined);
+    if (want && (team || !TEAM_ONLY_TABS.includes(want))) setTab(want);
   }, []);
   const pickUnit = (u: Unit) => { setUnit(u); localStorage.setItem("gaa-unit", u); };
   const pickFigure = (fg: Figure) => { setFigure(fg); localStorage.setItem("gaa-figure", fg); };
-  const pickTab = (t: Tab) => { setTab(t); localStorage.setItem("gaa-tab", t); };
+  const pickTab = (t: Tab) => {
+    setTab(t);
+    localStorage.setItem("gaa-tab", t);
+    // 주소창에도 반영 — 지금 보는 탭 그대로 복사·공유할 수 있게 (기본 탭이면 지운다)
+    const q = new URLSearchParams(location.search);
+    const slug = Object.entries(TAB_SLUGS).find(([, v]) => v === t)?.[0];
+    if (slug && t !== "보유 현황") q.set("tab", slug); else q.delete("tab");
+    const s = q.toString();
+    // 주의: 이 컴포넌트의 history state(총자산 추이)가 window.history를 가린다
+    window.history.replaceState(null, "", s ? `?${s}` : location.pathname);
+  };
 
   // 보유 비중 탭은 모바일 전용 — 데스크톱 폭이 되면 보유 현황으로 돌려보낸다
   useEffect(() => {
@@ -332,13 +356,15 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* 수익 기여 순위 — 누가 벌어다 줬고 누가 까먹었나 (달러 손익, 상위 3 + 하위 2) */}
+        {/* 수익 기여 순위 — 누가 벌어다 줬고 누가 까먹었나 (달러 손익, 상위 3 + 하위 2 / 펼치면 전체) */}
         {hasLive && (() => {
           const ranked = rows.filter((r) => r.pnlUsd != null && r.pnlUsd !== 0)
             .sort((a, b) => (b.pnlUsd ?? 0) - (a.pnlUsd ?? 0));
           if (ranked.length < 2) return null;
-          const show = [...ranked.slice(0, 3), ...ranked.slice(-2)]
-            .filter((r, i, arr) => arr.findIndex((x) => x.ticker === r.ticker) === i);
+          const show = contribOpen
+            ? ranked
+            : [...ranked.slice(0, 3), ...ranked.slice(-2)]
+                .filter((r, i, arr) => arr.findIndex((x) => x.ticker === r.ticker) === i);
           const maxAbs = Math.max(...ranked.map((x) => Math.abs(x.pnlUsd ?? 0)), 1);
           return (
             <div className="contrib">
@@ -355,6 +381,11 @@ export default function Dashboard() {
                   <span className={`v ${deltaClass(r.pnlUsd)}`}>{signed(r.pnlUsd)}</span>
                 </div>
               ))}
+              {ranked.length > 5 && (
+                <button className="contrib-more num" onClick={() => setContribOpen((v) => !v)} aria-expanded={contribOpen}>
+                  {contribOpen ? "접기 ▴" : `전체 ${ranked.length}종목 보기 ▾`}
+                </button>
+              )}
             </div>
           );
         })()}
@@ -539,6 +570,8 @@ export default function Dashboard() {
         </div>
 
         <div className="col-main">
+          {/* 오늘 할 일 — 예약된 집행·감시 룰이 종목 상세에 묻히지 않게 (팀 전용) */}
+          {teamMode && <ActionBar />}
           <div className="tabs" role="tablist" aria-label="포트폴리오 보기">
             {TABS.map((t) => (
               <button
@@ -556,7 +589,8 @@ export default function Dashboard() {
 
           {tab === "보유 현황" && (
             <section className="section" role="tabpanel" aria-label="보유 현황">
-              <StoryBlock />
+              {/* 팀원에겐 매일 같은 내용이라 접을 수 있게 — 공개판은 항상 펼침 */}
+              <StoryBlock collapsible={teamMode} />
               <div className="section-head">
                 <h2 className="sr-only">보유 현황</h2>
                 <span className="meta num">{rows.length > 0 ? quoteNote : ""}</span>

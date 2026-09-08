@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { HOLDINGS } from "@/lib/portfolio";
 
 /**
@@ -32,18 +33,45 @@ const ROLES: { key: string; tone: "alpha" | "hedge" | "div" | "core"; sectors: s
   },
 ];
 
-export default function StoryBlock() {
+export default function StoryBlock({ collapsible = false }: { collapsible?: boolean }) {
+  // 팀 모드에서만 접을 수 있다 — 매일 보는 사람의 스크롤을 줄이고, 접힘 상태는 브라우저에 기억된다.
+  // 공개판(선배·외부인)은 스토리가 첫인상이므로 항상 펼쳐 보인다.
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    if (collapsible) {
+      try { if (localStorage.getItem("gaa-story") === "off") setOpen(false); } catch {}
+    }
+  }, [collapsible]);
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    try { localStorage.setItem("gaa-story", next ? "on" : "off"); } catch {}
+  };
+
   const weightOf = (sectors: string[]) =>
     HOLDINGS.positions
       .filter((p) => sectors.includes(p.sector))
       .reduce((s, p) => s + p.targetWeight, 0);
 
+  const expanded = !collapsible || open;
   return (
-    <div className="story">
+    <div className="story" data-collapsed={!expanded || undefined}>
       <div className="story-head">
         <h2>투자 스토리</h2>
-        <span className="meta">목표 비중 기준 · 종목별 편입 근거는 매수·매도 플랜에서 각 종목을 선택하면 확인할 수 있습니다</span>
+        {expanded && (
+          <span className="meta">목표 비중 기준 · 종목별 편입 근거는 매수·매도 플랜에서 각 종목을 선택하면 확인할 수 있습니다</span>
+        )}
+        {collapsible && (
+          <button className="story-toggle" onClick={toggle} aria-expanded={open}>
+            {open ? "접기 ▴" : "펼치기 ▾"}
+          </button>
+        )}
       </div>
+      {!expanded && (
+        <p className="story-thesis dim">핵심 논지: AI 사이클의 <b>메모리 병목</b> — 메인 알파 15% · 헤지 22.5% · 분산 17.5% · 코어·현금 45%</p>
+      )}
+      {expanded && (
+      <>
       <p className="story-thesis">
         본 포트폴리오의 핵심 투자 논지는 AI 투자 사이클에서 발생하는 <b>메모리 병목</b>입니다.
         해당 사이클을 공급과 수요 양측에서 매수하고, 반대 국면에 대비한 종목을 함께 편입했으며,
@@ -58,6 +86,8 @@ export default function StoryBlock() {
           </li>
         ))}
       </ul>
+      </>
+      )}
     </div>
   );
 }
