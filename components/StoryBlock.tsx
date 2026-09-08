@@ -16,7 +16,6 @@ const ROLES: { key: string; color: string; sectors: string[]; bullets: ReactNode
     bullets: [
       <>AI 데이터센터 투자 확대 → <b>메모리 공급 부족</b>이라는 판단</>,
       <>공급 측 <b>삼성전자·SK하이닉스</b> / 수요 측 <b>MSFT·META</b>를 함께 편입</>,
-      <>9/8 코스피 저항 돌파 확인 후 <b>SK하이닉스 비중 상향</b> (3.0% → 4.5%)</>,
     ],
   },
   {
