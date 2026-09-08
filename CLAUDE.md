@@ -15,6 +15,12 @@ GLIF 26-2 자산운용팀 실시간 포트폴리오 대시보드. Next.js 16 + R
 - 부득이하게 CLI/API로 배포했다면 **같은 소스를 즉시 `main`에 push**해서 저장소를 맞춰라.
 - push 전 Vercel Deployments에서 최신 프로덕션이 Git 커밋(source=git)인지 확인할 것.
 
+## 팀 모드 비밀번호 (2026-09-08 도입)
+
+`?team` 첫 진입 시 비밀번호를 묻는다 (현재 **glif2602**). 인증되면 localStorage에 저장돼 그 브라우저는 계속 팀 모드.
+검증은 `components/Dashboard.tsx`의 SHA-256 해시 비교 — 소프트 게이트라 번들 분석으로 데이터 접근은 가능함(학회 내부용으로 충분).
+비밀번호 변경법: `node -e "crypto.subtle.digest('SHA-256', new TextEncoder().encode('새비번')).then(b=>console.log([...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')))"` 로 해시를 만들어 Dashboard.tsx의 해시 상수를 교체하고 push.
+
 ## 매매 승인 규칙 (2026-09-08 신설, 사용자 지시 — 절대 규칙)
 
 **`trades.json`에 매수·매도 기록을 추가하는 것은 사용자의 명시적 승인이 있을 때만 한다.**

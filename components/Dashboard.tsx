@@ -73,18 +73,31 @@ export default function Dashboard() {
   // 수익 기여 순위 — 기본은 상위 3 + 하위 2, 펼치면 전 종목
   const [contribOpen, setContribOpen] = useState(false);
   // 팀 전용 모드 — 회의록 탭과 주간보고 초안이 여기 묶인다.
-  // ?team(또는 기존 ?report)으로 한 번 들어오면 이 브라우저에 저장돼 계속 보인다.
-  // 선배들께 보내는 기본 주소에서는 존재 자체가 안 보인다.
+  // ?team으로 들어오면 비밀번호를 물어보고, 맞으면 이 브라우저에 저장돼 계속 보인다.
+  // 이미 인증된 브라우저는 다시 묻지 않는다. 선배들께 보내는 기본 주소에서는 존재 자체가 안 보인다.
   const [teamMode, setTeamMode] = useState(false);
+  const [teamGate, setTeamGate] = useState(false);
+  const [gatePw, setGatePw] = useState("");
+  const [gateErr, setGateErr] = useState(false);
   useEffect(() => {
+    const authed = localStorage.getItem("gaa-team") === "on";
     const q = new URLSearchParams(location.search);
-    if (q.has("team") || q.has("report")) {
+    if (authed) setTeamMode(true);
+    else if (q.has("team") || q.has("report")) setTeamGate(true);
+  }, []);
+  const submitGate = async () => {
+    // 비밀번호는 코드에 해시로만 둔다 — 변경 시 CLAUDE.md의 해시 생성법 참조
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(gatePw.trim()));
+    const hex = [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (hex === "85d61d3932d27e041d211bae80cad22fa874366b801ce3eebf9728530000a356") {
       localStorage.setItem("gaa-team", "on");
       setTeamMode(true);
+      setTeamGate(false);
+      setGateErr(false);
     } else {
-      setTeamMode(localStorage.getItem("gaa-team") === "on");
+      setGateErr(true);
     }
-  }, []);
+  };
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [now, setNow] = useState<Date | null>(null);
@@ -100,7 +113,8 @@ export default function Dashboard() {
     if (fg === "현재가") setFigure("현재가");
     // 탭 복원 — URL의 ?tab=슬러그가 최우선(공유 링크), 없으면 마지막에 보던 탭.
     // 팀 전용 탭은 팀 모드일 때만 살린다. "보유 비중"은 모바일 전용이라 복원하지 않는다.
-    const team = localStorage.getItem("gaa-team") === "on" || /[?&](team|report)\b/.test(location.search);
+    // 비밀번호 게이트 도입 후로는 인증된 브라우저(localStorage)만 팀으로 본다
+    const team = localStorage.getItem("gaa-team") === "on";
     const slug = new URLSearchParams(location.search).get("tab");
     const fromUrl = slug ? TAB_SLUGS[slug] : undefined;
     const savedTab = localStorage.getItem("gaa-tab");
@@ -439,6 +453,24 @@ export default function Dashboard() {
       </p>
 
       {error && <p className="err" role="alert">{error}</p>}
+
+      {/* 팀 모드 비밀번호 게이트 — ?team으로 처음 들어온 브라우저에만 보인다 */}
+      {teamGate && !teamMode && (
+        <div className="team-gate" role="dialog" aria-label="팀 모드 비밀번호">
+          <span className="tg-label">팀 모드 비밀번호</span>
+          <input
+            type="password"
+            value={gatePw}
+            onChange={(e) => { setGatePw(e.target.value); setGateErr(false); }}
+            onKeyDown={(e) => { if (e.key === "Enter") submitGate(); }}
+            placeholder="팀에서 공유받은 비밀번호"
+            autoFocus
+          />
+          <button className="btn primary" onClick={submitGate}>입장</button>
+          {gateErr && <span className="tg-err">비밀번호가 다릅니다</span>}
+          <button className="tg-skip" onClick={() => setTeamGate(false)}>공개판으로 볼게요</button>
+        </div>
+      )}
 
       <MacroStrip quotes={quotes} markets={markets} />
 
