@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { HOLDINGS } from "@/lib/portfolio";
 
 /**
@@ -10,48 +10,48 @@ import { HOLDINGS } from "@/lib/portfolio";
  * 비중은 holdings.json의 목표 비중(MP)을 섹터→역할 매핑으로 집계한다.
  */
 
-const ROLES: { key: string; color: string; sectors: string[]; bullets: string[] }[] = [
+const ROLES: { key: string; color: string; sectors: string[]; bullets: ReactNode[] }[] = [
   {
     key: "메인 알파", color: "var(--s2)", sectors: ["AI CapEx"],
     bullets: [
-      "AI 데이터센터 투자 확대 → 메모리 공급 부족이라는 판단",
-      "공급 측 삼성전자·SK하이닉스 / 수요 측 MSFT·META를 함께 편입",
-      "9/8 코스피 저항 돌파 확인 후 SK하이닉스 비중 상향 (3.0% → 4.5%)",
+      <>AI 데이터센터 투자 확대 → <b>메모리 공급 부족</b>이라는 판단</>,
+      <>공급 측 <b>삼성전자·SK하이닉스</b> / 수요 측 <b>MSFT·META</b>를 함께 편입</>,
+      <>9/8 코스피 저항 돌파 확인 후 <b>SK하이닉스 비중 상향</b> (3.0% → 4.5%)</>,
     ],
   },
   {
     key: "알파 ②", color: "var(--s9)", sectors: ["AI 보안"],
     bullets: [
-      "AI 도입의 다음 단계 지출인 보안 — 탐지 층 CrowdStrike, 복구 층 Rubrik",
-      "GPT-6 Astra의 사이버보안 'Critical' 등급 도달(9/3)로 촉매 현실화 판단",
+      <>AI 도입의 다음 단계 지출인 <b>보안</b> — 탐지 층 <b>CrowdStrike</b>, 복구 층 <b>Rubrik</b></>,
+      <>GPT-6 Astra의 사이버보안 <b>&lsquo;Critical&rsquo; 등급</b> 도달(9/3)로 촉매 현실화 판단</>,
     ],
   },
   {
     key: "헤지 ①", color: "var(--s7)", sectors: ["메모리 역상관"],
     bullets: [
-      "메모리를 원가로 부담하는 기업 (QCOM·AAPL·DELL·HPQ)",
-      "메모리 가격 하락 국면에서 포트폴리오를 방어",
+      <><b>메모리를 원가로 부담</b>하는 기업 (<b>QCOM·AAPL·DELL·HPQ</b>)</>,
+      <>메모리 가격 하락 국면에서 포트폴리오를 방어</>,
     ],
   },
   {
     key: "헤지 ②", color: "var(--s5)", sectors: ["금리 (인하)", "금리 (인상)"],
     bullets: [
-      "장기 국채(TLT·IEF) ↔ 은행(JPM·BAC·XLF) 양방향 보유",
-      "금리 방향과 무관하게 영향을 중립화",
+      <>장기 국채 <b>TLT·IEF</b> ↔ 은행 <b>JPM·BAC·XLF</b> 양방향 보유</>,
+      <>금리 방향과 무관하게 영향을 <b>중립화</b></>,
     ],
   },
   {
     key: "분산", color: "var(--s3)", sectors: ["에너지", "유럽 방산"],
     bullets: [
-      "에너지 메이저 4종 + 유럽 방산(EUAD) — 주력 테마와 상관 낮은 자산군",
-      "방산은 휴전 협상 진전으로 목표 절반 축소, AI 보안으로 로테이션 중",
+      <><b>에너지 메이저 4종</b> + 유럽 방산 <b>EUAD</b> — 주력 테마와 상관 낮은 자산군</>,
+      <>방산은 휴전 협상 진전으로 <b>목표 절반 축소</b>, AI 보안으로 로테이션 중</>,
     ],
   },
   {
     key: "코어·현금", color: "var(--s1)", sectors: ["코어 인덱스", "현금"],
     bullets: [
-      "월드 인덱스(VT) + 초단기 국채(SGOV)",
-      "차기 기수 합류 이후의 본격 운용을 위해 남겨 둔 재원",
+      <>월드 인덱스 <b>VT</b> + 초단기 국채 <b>SGOV</b> (배당 자동 재투자 대상)</>,
+      <><b>차기 기수</b> 합류 이후의 본격 운용을 위해 남겨 둔 재원</>,
     ],
   },
 ];

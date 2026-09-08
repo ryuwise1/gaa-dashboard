@@ -8,7 +8,7 @@ import ACTIONS from "@/data/actions.json";
  * 데이터는 data/actions.json — 끝난 항목은 지우고 새 예약은 추가한다 (규칙: CLAUDE.md).
  */
 
-interface ActionItem { id: string; type: string; text: string; detail?: string; due?: string }
+interface ActionItem { id: string; type: string; text: string; bullets?: string[]; due?: string }
 
 function dueChip(due: string | undefined, today: string) {
   if (!due) return null;
@@ -37,7 +37,11 @@ export default function ActionBar() {
               <span className={`act-type${it.type === "집행 예정" ? " exec" : ""}`}>{it.type}</span>
               <span className="act-body">
                 <b>{it.text}</b>
-                {it.detail && <span className="act-detail">{it.detail}</span>}
+                {!!it.bullets?.length && (
+                  <ul className="act-bullets">
+                    {it.bullets.map((b, i) => <li key={i}>{b}</li>)}
+                  </ul>
+                )}
               </span>
               {due && <span className={`act-due num ${due.cls}`}>{due.label}</span>}
             </li>

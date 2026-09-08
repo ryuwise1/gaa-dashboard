@@ -1,6 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { HOLDINGS } from "@/lib/portfolio";
+import { MEETINGS, OPENING_DATE, TRADES, type Trade } from "@/lib/trades";
+
+/* ── 우리 활동 오버레이 — 시장 일정 위에 우리의 회의·매매를 겹쳐 복기가 되게 한다 ── */
+const TICKER_NAME = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
+interface Ours { meetings: { no: number; note: string }[]; trades: Trade[]; opening: boolean }
+const OURS: Map<string, Ours> = (() => {
+  const m = new Map<string, Ours>();
+  const at = (d: string) => {
+    let o = m.get(d);
+    if (!o) { o = { meetings: [], trades: [], opening: false }; m.set(d, o); }
+    return o;
+  };
+  at(OPENING_DATE).opening = true;
+  for (const mt of MEETINGS) at(mt.date).meetings.push({ no: mt.no, note: mt.note });
+  for (const t of TRADES) at(t.date).trades.push(t);
+  return m;
+})();
+const fmtTradeLine = (t: Trade) =>
+  `${t.side} ${TICKER_NAME.get(t.ticker) ?? t.ticker} ${t.qty.toLocaleString()}주`;
 
 interface MacroEvent {
   time: string; country: string; title: string;
@@ -343,12 +363,29 @@ export default function Calendar({ team = false }: { team?: boolean }) {
                         data-past={!!cell.date && cell.date < kstToday()}
                         data-empty={!cell.date}
                         data-sel={!!cell.date && cell.date === selDay}
-                        data-clickable={!!cell.d}
-                        onClick={() => cell.d && setSelDay((cur) => (cur === cell.date ? null : cell.date))}
+                        data-clickable={!!cell.d || OURS.has(cell.date)}
+                        onClick={() => (cell.d || OURS.has(cell.date)) && setSelDay((cur) => (cur === cell.date ? null : cell.date))}
                       >
                         {cell.date && (
                           <>
                             <div className="g-day num">{cell.dayNum}</div>
+                            {(() => {
+                              const o = OURS.get(cell.date);
+                              if (!o) return null;
+                              return (
+                                <>
+                                  {o.opening && <div className="g-ev ours" title="1차 회의 결정으로 개시 포트폴리오 편입">★ 운용 개시</div>}
+                                  {o.meetings.map((mt) => (
+                                    <div key={"mt" + mt.no} className="g-ev ours" title={mt.note}>{mt.no}차 회의</div>
+                                  ))}
+                                  {o.trades.length > 0 && (
+                                    <div className="g-ev ours" title={o.trades.map(fmtTradeLine).join(" · ")}>
+                                      매매 {o.trades.length}건
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
                             {cell.d?.macro.slice(0, 3).map((m, k) => (
                               <div key={"m" + k} className="g-ev macro" data-impact={m.impact}
                                 title={`${kstTime(m.time)} ${m.country} · ${m.ko ?? m.title}${m.actual ? ` — 실제 ${m.actual}${m.verdict ? ` (예상 ${m.verdict})` : ""}` : ""}${m.desc ? ` — ${m.desc}` : ""}`}>
@@ -379,6 +416,7 @@ export default function Calendar({ team = false }: { team?: boolean }) {
           {/* 클릭한 날짜의 상세 — 주간 뷰와 같은 형식 */}
           {selDay && (() => {
             const d = (monthDays[month] ?? []).find((x) => x.date === selDay);
+            const o = OURS.get(selDay);
             const { label } = dayLabel(selDay);
             return (
               <div className="cal-day cal-detail" data-today={selDay === kstToday()}>
@@ -387,7 +425,22 @@ export default function Calendar({ team = false }: { team?: boolean }) {
                   {selDay === kstToday() && <span className="cal-today">오늘</span>}
                   <button className="cal-close" onClick={() => setSelDay(null)} aria-label="상세 닫기">닫기 ✕</button>
                 </div>
-                {!d && <div className="cal-none">등록된 일정이 없습니다</div>}
+                {o && (
+                  <div className="cal-ours">
+                    <div className="cal-col-head">우리 활동</div>
+                    {o.opening && <div className="cal-ours-item"><b>★ 운용 개시</b><span>1차 회의 결정으로 개시 포트폴리오 편입</span></div>}
+                    {o.meetings.map((mt) => (
+                      <div key={mt.no} className="cal-ours-item"><b>{mt.no}차 정기회의</b><span>{mt.note}</span></div>
+                    ))}
+                    {o.trades.map((t, i) => (
+                      <div key={i} className="cal-ours-item">
+                        <b className={t.side === "매수" ? "buy" : "sell"}>{fmtTradeLine(t)}</b>
+                        <span>{t.note}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!d && !o && <div className="cal-none">등록된 일정이 없습니다</div>}
                 {d && (
                   <div className="cal-cols">
                     <div className="cal-col">

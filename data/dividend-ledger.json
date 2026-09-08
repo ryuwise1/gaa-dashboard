@@ -1,0 +1,101 @@
+{
+ "_comment": "배당 수령 원장 — 배당락일 기준 확정분. /api/dividends와 대조해 신규 수령분을 추가한다 (규칙: CLAUDE.md). 이 합계가 현금 잔고에 가산되고, 월 1회 SGOV 재투자 매수로 원장(trades.json)에 기록한다.",
+ "items": [
+  {
+   "date": "2026-08-03",
+   "ticker": "SGOV",
+   "perShare": 0.307,
+   "qty": 248,
+   "currency": "USD",
+   "usd": 76.14
+  },
+  {
+   "date": "2026-08-10",
+   "ticker": "AAPL",
+   "perShare": 0.27,
+   "qty": 20,
+   "currency": "USD",
+   "usd": 5.4
+  },
+  {
+   "date": "2026-08-14",
+   "ticker": "SHEL",
+   "perShare": 0.7812,
+   "qty": 138,
+   "currency": "USD",
+   "usd": 107.81
+  },
+  {
+   "date": "2026-08-17",
+   "ticker": "XOM",
+   "perShare": 1.03,
+   "qty": 79,
+   "currency": "USD",
+   "usd": 81.37
+  },
+  {
+   "date": "2026-08-19",
+   "ticker": "CVX",
+   "perShare": 1.78,
+   "qty": 65,
+   "currency": "USD",
+   "usd": 115.7
+  },
+  {
+   "date": "2026-08-20",
+   "ticker": "MSFT",
+   "perShare": 0.91,
+   "qty": 38,
+   "currency": "USD",
+   "usd": 34.58
+  },
+  {
+   "date": "2026-08-27",
+   "ticker": "000660",
+   "perShare": 375,
+   "qty": 15,
+   "currency": "KRW",
+   "usd": 4.2
+  },
+  {
+   "date": "2026-09-01",
+   "ticker": "IEF",
+   "perShare": 0.332,
+   "qty": 201,
+   "currency": "USD",
+   "usd": 66.73
+  },
+  {
+   "date": "2026-09-01",
+   "ticker": "SGOV",
+   "perShare": 0.307,
+   "qty": 248,
+   "currency": "USD",
+   "usd": 76.14
+  },
+  {
+   "date": "2026-09-01",
+   "ticker": "TLT",
+   "perShare": 0.315,
+   "qty": 225,
+   "currency": "USD",
+   "usd": 70.88
+  },
+  {
+   "date": "2026-09-03",
+   "ticker": "QCOM",
+   "perShare": 0.92,
+   "qty": 78,
+   "currency": "USD",
+   "usd": 71.76
+  },
+  {
+   "date": "2026-09-04",
+   "ticker": "BAC",
+   "perShare": 0.32,
+   "qty": 102,
+   "currency": "USD",
+   "usd": 32.64
+  }
+ ]
+}

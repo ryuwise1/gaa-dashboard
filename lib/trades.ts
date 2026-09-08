@@ -1,4 +1,5 @@
 import ledger from "@/data/trades.json";
+import divLedger from "@/data/dividend-ledger.json";
 import type { Currency } from "@/lib/portfolio";
 
 export interface Trade {
@@ -164,11 +165,15 @@ export const realizedLots = REPLAY.realized;
  * AUM에서 기초 보유원가와 이후 매수액을 빼고 매도 대금을 더한다.
  * 배당·수수료는 모의투자라 반영하지 않는다.
  */
-export const cashUsd =
-  AUM_USD - REPLAY.openingCostUsd - REPLAY.buysUsd + REPLAY.sellsUsd;
+/** 배당 수령 누적 — 배당락일 기준 확정분 (data/dividend-ledger.json). 현금으로 들어와 SGOV 재투자 재원이 된다 */
+export const dividendUsd = (divLedger as { items: { usd: number }[] }).items.reduce((s, i) => s + i.usd, 0);
 
-/** 지금까지 실제로 투입된 원가 (기초 + 매수 − 매도분 원가) */
-export const investedUsd = AUM_USD - cashUsd;
+const cashBase =
+  AUM_USD - REPLAY.openingCostUsd - REPLAY.buysUsd + REPLAY.sellsUsd;
+export const cashUsd = cashBase + dividendUsd;
+
+/** 지금까지 실제로 투입된 원가 (기초 + 매수 − 매도분 원가) — 배당과는 무관 */
+export const investedUsd = AUM_USD - cashBase;
 
 export const totalBuysUsd = REPLAY.buysUsd;
 export const totalSellsUsd = REPLAY.sellsUsd;

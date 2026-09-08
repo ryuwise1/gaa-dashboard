@@ -61,9 +61,15 @@ async function fetchNaver(symbol: string, code: string): Promise<Quote | null> {
 
   // 시간외 세션(넥스트레이드 프리·애프터마켓)이 열려 있으면 같이 싣는다.
   // 정규장 숫자는 건드리지 않고 보조 정보로만 — pct는 정규장 종가 대비.
+  // 주의: 정규장(평일 09:00~15:30 KST) 중에도 네이버가 NXT 병행 세션을 OPEN으로
+  // 내려보내 "시간외 0.00%"가 붙는다 — 정규장 중이거나 정규가와 같으면 싣지 않는다.
+  const kst = new Date(Date.now() + 9 * 3600_000);
+  const hm = kst.getUTCHours() * 100 + kst.getUTCMinutes();
+  const wd = kst.getUTCDay();
+  const krRegularOpen = wd >= 1 && wd <= 5 && hm >= 900 && hm < 1530;
   const o = j?.overMarketPriceInfo;
   const overPrice = toNum(o?.overPrice);
-  if (o?.overMarketStatus === "OPEN" && overPrice != null && price > 0) {
+  if (!krRegularOpen && o?.overMarketStatus === "OPEN" && overPrice != null && price > 0 && overPrice !== price) {
     q.over = {
       price: overPrice,
       pct: (overPrice - price) / price,
