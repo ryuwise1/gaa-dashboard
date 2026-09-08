@@ -407,6 +407,45 @@ export default function Dashboard() {
       </section>
   );
 
+  // ?team으로 들어왔는데 미인증이면 보드 내용을 아예 보여주지 않는다 —
+  // 편집 피드백 보드와 같은 풀스크린 로그인 화면 (모든 훅 선언 뒤의 조기 반환)
+  if (teamGate && !teamMode) {
+    return (
+      <div className="gate-screen">
+        <div className="gate-card">
+          {/* 라이트 테마 = 남색 로고, 다크 테마 = 흰색 로고 */}
+          <img src="/glif-logo-blue.png" alt="GLIF" className="gate-logo light" />
+          <img src="/glif-logo-white.png" alt="" aria-hidden className="gate-logo dark" />
+          <h1>자산운용팀 보드</h1>
+          <p className="gate-sub">담당자에게 받은 비밀번호를 입력하세요</p>
+          <input
+            type="password"
+            value={gatePw}
+            onChange={(e) => { setGatePw(e.target.value); setGateErr(false); }}
+            onKeyDown={(e) => { if (e.key === "Enter") submitGate(); }}
+            placeholder="비밀번호"
+            autoFocus
+            aria-label="팀 모드 비밀번호"
+          />
+          <button className="gate-btn" onClick={submitGate}>들어가기</button>
+          {gateErr && <p className="gate-err">비밀번호가 다릅니다</p>}
+          <button
+            className="gate-skip"
+            onClick={() => {
+              const q = new URLSearchParams(location.search);
+              q.delete("team"); q.delete("report");
+              const s = q.toString();
+              window.history.replaceState(null, "", s ? `?${s}` : location.pathname);
+              setTeamGate(false);
+            }}
+          >
+            공개판으로 볼게요
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="wrap">
       <header className="topbar">
@@ -453,24 +492,6 @@ export default function Dashboard() {
       </p>
 
       {error && <p className="err" role="alert">{error}</p>}
-
-      {/* 팀 모드 비밀번호 게이트 — ?team으로 처음 들어온 브라우저에만 보인다 */}
-      {teamGate && !teamMode && (
-        <div className="team-gate" role="dialog" aria-label="팀 모드 비밀번호">
-          <span className="tg-label">팀 모드 비밀번호</span>
-          <input
-            type="password"
-            value={gatePw}
-            onChange={(e) => { setGatePw(e.target.value); setGateErr(false); }}
-            onKeyDown={(e) => { if (e.key === "Enter") submitGate(); }}
-            placeholder="팀에서 공유받은 비밀번호"
-            autoFocus
-          />
-          <button className="btn primary" onClick={submitGate}>입장</button>
-          {gateErr && <span className="tg-err">비밀번호가 다릅니다</span>}
-          <button className="tg-skip" onClick={() => setTeamGate(false)}>공개판으로 볼게요</button>
-        </div>
-      )}
 
       <MacroStrip quotes={quotes} markets={markets} />
 

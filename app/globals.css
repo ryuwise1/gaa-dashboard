@@ -1092,23 +1092,38 @@ a { color: var(--accent); }
   margin: 3px 0 0; font-size: 10.5px; color: var(--muted); line-height: 1.5;
 }
 
-/* ── 팀 모드 비밀번호 게이트 ── */
-.team-gate {
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--hairline));
-  background: color-mix(in srgb, var(--accent) 5%, var(--bg));
-  border-radius: 12px; padding: 10px 14px; margin-bottom: 12px;
+/* ── 팀 모드 로그인 — 풀스크린 게이트. 인증 전에는 보드 내용이 아예 렌더되지 않는다 ── */
+.gate-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: var(--bg); padding: 24px;
 }
-.tg-label { font-size: 12px; font-weight: 800; }
-.team-gate input {
-  flex: 1; min-width: 160px; max-width: 260px;
-  border: 1px solid var(--hairline); border-radius: 8px; padding: 6px 10px;
-  font-size: 12.5px; background: var(--bg); color: var(--ink);
+.gate-card {
+  width: 100%; max-width: 340px; text-align: center;
+  border: 1px solid var(--hairline); border-radius: 16px;
+  background: var(--sunken, var(--bg)); padding: 36px 30px 28px;
+  display: flex; flex-direction: column; gap: 10px;
 }
-.team-gate input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); }
-.tg-err { font-size: 11px; color: var(--loss); font-weight: 700; }
-.tg-skip { border: 0; background: none; cursor: pointer; font-size: 11px; color: var(--muted); padding: 0; margin-left: auto; }
-.tg-skip:hover { color: var(--ink-2); text-decoration: underline; }
+.gate-logo { height: 44px; object-fit: contain; margin: 0 auto 4px; }
+.gate-logo.dark { display: none; }
+[data-theme="dark"] .gate-logo.light { display: none; }
+[data-theme="dark"] .gate-logo.dark { display: block; }
+.gate-card h1 { margin: 2px 0 0; font-size: 17px; font-weight: 800; color: var(--ink); }
+.gate-sub { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.gate-card input {
+  border: 1px solid var(--hairline); border-radius: 9px; padding: 10px 12px;
+  font-size: 13px; background: var(--bg); color: var(--ink); text-align: left;
+}
+.gate-card input:focus { outline: 2px solid color-mix(in srgb, var(--accent) 45%, transparent); }
+.gate-btn {
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--hairline));
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+  color: var(--accent); font-weight: 800; font-size: 13px;
+  border-radius: 9px; padding: 10px 0; cursor: pointer;
+}
+.gate-btn:hover { background: color-mix(in srgb, var(--accent) 24%, var(--bg)); }
+.gate-err { margin: 0; font-size: 11.5px; color: var(--loss); font-weight: 700; }
+.gate-skip { border: 0; background: none; cursor: pointer; font-size: 11.5px; color: var(--muted); padding: 4px 0 0; }
+.gate-skip:hover { color: var(--ink-2); text-decoration: underline; }
 
 /* ── 오늘 할 일 — 팀 전용 배너. 예약된 집행·감시 룰이 첫 화면에서 보이게 ── */
 .actions {
