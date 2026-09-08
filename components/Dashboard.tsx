@@ -417,7 +417,7 @@ export default function Dashboard() {
           <img src="/glif-logo-blue.png" alt="GLIF" className="gate-logo light" />
           <img src="/glif-logo-white.png" alt="" aria-hidden className="gate-logo dark" />
           <h1>자산운용팀 보드</h1>
-          <p className="gate-sub">담당자에게 받은 비밀번호를 입력하세요</p>
+          <p className="gate-sub">자산운용팀장에게 받은 비밀번호를 입력하세요</p>
           <input
             type="password"
             value={gatePw}
