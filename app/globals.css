@@ -1098,9 +1098,13 @@ a { color: var(--accent); }
   background: color-mix(in srgb, var(--accent) 4%, var(--bg));
   border-radius: 12px; padding: 11px 15px; margin-bottom: 12px;
 }
+.actions[data-collapsed] { padding-top: 9px; padding-bottom: 9px; }
 .actions-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 9px; }
+.actions[data-collapsed] .actions-head { margin-bottom: 0; }
 .actions-head h2 { font-size: 12.5px; font-weight: 800; margin: 0; }
 .actions-head .cnt { font-size: 10.5px; font-weight: 800; color: var(--accent); }
+.act-summary { margin-left: 8px; font-size: 11px; color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; min-width: 0; }
+.actions-head .act-due { margin-left: 0; flex: none; }
 .actions ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
 .actions li { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 1.55; }
 .act-type {
