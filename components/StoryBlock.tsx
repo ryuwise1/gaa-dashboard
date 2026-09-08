@@ -5,47 +5,63 @@ import { HOLDINGS } from "@/lib/portfolio";
 
 /**
  * 투자 스토리 — 이 포트폴리오가 무슨 베팅인지 첫 화면에서 읽히게 한다.
- * "메인으로 무엇의 어떤 알파에 투자했고, 그걸 어떤 종목으로 표현했고,
- *  무엇으로 헤지하고, 나머지는 어떤 역할인가"를 역할 단위로 요약.
- * 비중은 holdings.json의 목표 비중(MP)을 섹터→역할 매핑으로 집계한다 (1차 회의 프레임 기준).
+ * 기본은 접힘: 역할별 비중 스택 바 + 범례만으로 구조가 한눈에 보인다.
+ * 펼치면 같은 차트 아래로 역할별 근거가 개조식으로 나온다.
+ * 비중은 holdings.json의 목표 비중(MP)을 섹터→역할 매핑으로 집계한다.
  */
 
-const ROLES: { key: string; tone: "alpha" | "hedge" | "div" | "core"; sectors: string[]; line: string }[] = [
+const ROLES: { key: string; color: string; sectors: string[]; bullets: string[] }[] = [
   {
-    key: "메인 알파", tone: "alpha", sectors: ["AI CapEx"],
-    line: "AI 데이터센터 투자 확대가 메모리 공급 부족으로 이어진다는 판단입니다. 공급 측(삼성전자·SK하이닉스)과 수요 측(MSFT·META)을 함께 편입했으며, 9/8 코스피 저항 돌파를 확인하고 SK하이닉스 비중을 상향했습니다",
+    key: "메인 알파", color: "var(--s2)", sectors: ["AI CapEx"],
+    bullets: [
+      "AI 데이터센터 투자 확대 → 메모리 공급 부족이라는 판단",
+      "공급 측 삼성전자·SK하이닉스 / 수요 측 MSFT·META를 함께 편입",
+      "9/8 코스피 저항 돌파 확인 후 SK하이닉스 비중 상향 (3.0% → 4.5%)",
+    ],
   },
   {
-    key: "알파 ②", tone: "alpha", sectors: ["AI 보안"],
-    line: "AI 도입의 다음 단계 지출인 보안입니다. 탐지 층(CrowdStrike)과 복구 층(Rubrik)으로 나누어 편입하며, GPT-6 Astra의 사이버보안 'Critical' 등급 도달로 촉매가 현실화되었다고 판단했습니다",
+    key: "알파 ②", color: "var(--s9)", sectors: ["AI 보안"],
+    bullets: [
+      "AI 도입의 다음 단계 지출인 보안 — 탐지 층 CrowdStrike, 복구 층 Rubrik",
+      "GPT-6 Astra의 사이버보안 'Critical' 등급 도달(9/3)로 촉매 현실화 판단",
+    ],
   },
   {
-    key: "헤지 ①", tone: "hedge", sectors: ["메모리 역상관"],
-    line: "메모리를 원가로 부담하는 기업(QCOM·AAPL·DELL·HPQ)입니다. 메모리 가격 하락 국면에서 포트폴리오를 방어합니다",
+    key: "헤지 ①", color: "var(--s7)", sectors: ["메모리 역상관"],
+    bullets: [
+      "메모리를 원가로 부담하는 기업 (QCOM·AAPL·DELL·HPQ)",
+      "메모리 가격 하락 국면에서 포트폴리오를 방어",
+    ],
   },
   {
-    key: "헤지 ②", tone: "hedge", sectors: ["금리 (인하)", "금리 (인상)"],
-    line: "장기 국채(TLT·IEF)와 은행(JPM·BAC·XLF)을 양방향으로 보유하여 금리 변동의 영향을 중립화했습니다",
+    key: "헤지 ②", color: "var(--s5)", sectors: ["금리 (인하)", "금리 (인상)"],
+    bullets: [
+      "장기 국채(TLT·IEF) ↔ 은행(JPM·BAC·XLF) 양방향 보유",
+      "금리 방향과 무관하게 영향을 중립화",
+    ],
   },
   {
-    key: "분산", tone: "div", sectors: ["에너지", "유럽 방산"],
-    line: "에너지 메이저 4종과 유럽 방산(EUAD)입니다. 방산은 휴전 협상 진전으로 목표를 절반 축소하여 AI 보안으로 로테이션하고 있습니다",
+    key: "분산", color: "var(--s3)", sectors: ["에너지", "유럽 방산"],
+    bullets: [
+      "에너지 메이저 4종 + 유럽 방산(EUAD) — 주력 테마와 상관 낮은 자산군",
+      "방산은 휴전 협상 진전으로 목표 절반 축소, AI 보안으로 로테이션 중",
+    ],
   },
   {
-    key: "코어·현금", tone: "core", sectors: ["코어 인덱스", "현금"],
-    line: "월드 인덱스(VT)와 초단기 국채(SGOV)입니다. 차기 기수 합류 이후의 본격 운용을 위해 남겨 둔 재원입니다",
+    key: "코어·현금", color: "var(--s1)", sectors: ["코어 인덱스", "현금"],
+    bullets: [
+      "월드 인덱스(VT) + 초단기 국채(SGOV)",
+      "차기 기수 합류 이후의 본격 운용을 위해 남겨 둔 재원",
+    ],
   },
 ];
 
-export default function StoryBlock({ collapsible = false }: { collapsible?: boolean }) {
-  // 팀 모드에서만 접을 수 있다 — 매일 보는 사람의 스크롤을 줄이고, 접힘 상태는 브라우저에 기억된다.
-  // 공개판(선배·외부인)은 스토리가 첫인상이므로 항상 펼쳐 보인다.
-  const [open, setOpen] = useState(true);
+export default function StoryBlock() {
+  // 기본은 접힘 — 펼친 상태는 브라우저에 기억된다
+  const [open, setOpen] = useState(false);
   useEffect(() => {
-    if (collapsible) {
-      try { if (localStorage.getItem("gaa-story") === "off") setOpen(false); } catch {}
-    }
-  }, [collapsible]);
+    try { if (localStorage.getItem("gaa-story") === "on") setOpen(true); } catch {}
+  }, []);
   const toggle = () => {
     const next = !open;
     setOpen(next);
@@ -56,45 +72,53 @@ export default function StoryBlock({ collapsible = false }: { collapsible?: bool
     HOLDINGS.positions
       .filter((p) => sectors.includes(p.sector))
       .reduce((s, p) => s + p.targetWeight, 0);
+  const pct = (sectors: string[]) =>
+    (weightOf(sectors) * 100).toFixed(1).replace(/\.0$/, "");
 
-  const expanded = !collapsible || open;
   return (
-    <div className="story" data-collapsed={!expanded || undefined}>
+    <div className="story" data-collapsed={!open || undefined}>
       <div className="story-head">
         <h2>투자 스토리</h2>
-        {expanded && (
-          <span className="meta">목표 비중 기준 · 종목별 편입 근거는 매수·매도 플랜에서 각 종목을 선택하면 확인할 수 있습니다</span>
-        )}
-        {collapsible && (
-          <button className="story-toggle" onClick={toggle} aria-expanded={open}>
-            {open ? "접기 ▴" : "펼치기 ▾"}
-          </button>
-        )}
+        {open && <span className="meta">목표 비중 기준 · 종목별 근거는 매수·매도 플랜에서 각 종목 선택</span>}
+        <button className="story-toggle" onClick={toggle} aria-expanded={open}>
+          {open ? "접기 ▴" : "펼치기 ▾"}
+        </button>
       </div>
-      {!expanded && (
-        <p className="story-thesis dim">
-          핵심 논지: AI 사이클의 <b>메모리 병목</b> + 도입 단계의 <b>보안 지출</b> —{" "}
-          {ROLES.map((r) => `${r.key} ${(weightOf(r.sectors) * 100).toFixed(1).replace(/\.0$/, "")}%`).join(" · ")}
-        </p>
-      )}
-      {expanded && (
-      <>
-      <p className="story-thesis">
-        본 포트폴리오의 핵심 투자 논지는 AI 투자 사이클에서 발생하는 <b>메모리 병목</b>이며,
-        그 후행 수혜로 <b>AI 보안</b>을 확장 편입했습니다.
-        사이클을 공급과 수요 양측에서 매수하고, 반대 국면에 대비한 종목을 함께 편입했으며,
-        금리 리스크는 양방향 포지션으로 중립화했습니다.
-      </p>
-      <ul className="story-roles">
+
+      {/* 역할별 목표 비중 — 접혀 있어도 항상 보이는 구조 요약 */}
+      <div className="story-bar" role="img" aria-label="역할별 목표 비중">
         {ROLES.map((r) => (
-          <li key={r.key}>
-            <span className={`story-badge ${r.tone}`}>{r.key}</span>
-            <b className="num">{(weightOf(r.sectors) * 100).toFixed(1).replace(/\.0$/, "")}%</b>
-            <span className="story-line">{r.line}</span>
-          </li>
+          <i key={r.key} style={{ width: `${weightOf(r.sectors) * 100}%`, background: r.color }} title={`${r.key} ${pct(r.sectors)}%`} />
         ))}
-      </ul>
-      </>
+      </div>
+      <div className="story-legend">
+        {ROLES.map((r) => (
+          <span key={r.key} className="story-leg">
+            <i style={{ background: r.color }} />
+            {r.key} <b className="num">{pct(r.sectors)}%</b>
+          </span>
+        ))}
+      </div>
+
+      {open && (
+        <>
+          <p className="story-thesis">
+            핵심 논지는 AI 투자 사이클의 <b>메모리 병목</b>이며, 그 후행 수혜로 <b>AI 보안</b>을 확장 편입했습니다.
+          </p>
+          <ul className="story-roles">
+            {ROLES.map((r) => (
+              <li key={r.key}>
+                <span className="story-badge" style={{ background: `color-mix(in srgb, ${r.color} 16%, transparent)`, color: r.color }}>
+                  {r.key}
+                </span>
+                <b className="num">{pct(r.sectors)}%</b>
+                <ul className="story-bullets">
+                  {r.bullets.map((b, i) => <li key={i}>{b}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </div>
   );

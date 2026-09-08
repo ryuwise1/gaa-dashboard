@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HOLDINGS } from "@/lib/portfolio";
 import krEventsJson from "@/data/kr-events.json";
+import macroHistoryJson from "@/data/macro-history.json";
+import macroScheduleJson from "@/data/macro-schedule.json";
 import { koMacro } from "@/lib/macro-dict";
 
 export const runtime = "nodejs";
@@ -68,6 +70,16 @@ const COUNTRY: Record<string, string> = {
 
 const kstDate = (d: Date) =>
   new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(d);
+
+/* ── 정적 매크로 데이터 ─────────────────────────────────────────
+   FF 무료 피드는 이번 주 분량만 제공된다. 그 밖의 기간은
+   - 과거: Nasdaq economicevents 스크랩 (macro-history.json, 실제치 포함)
+   - 미래: 각 기관 공식 발표 일정 큐레이션 (macro-schedule.json, ~12월)
+   로 채운다. 같은 날 같은 지표가 FF에도 있으면 FF(예상치 살아있음)를 우선한다. */
+const STATIC_MACRO: MacroEvent[] = [
+  ...Object.values(macroHistoryJson as unknown as Record<string, MacroEvent[]>).flat(),
+  ...Object.values((macroScheduleJson as unknown as { days: Record<string, MacroEvent[]> }).days).flat(),
+];
 
 async function fetchMacro(): Promise<MacroEvent[]> {
   const res = await fetch("https://nfs.faireconomy.media/ff_calendar_thisweek.json", {
@@ -252,7 +264,8 @@ async function attachActuals(days: CalDay[]): Promise<void> {
       new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date(iso));
     const plus1 = (d: string) => new Date(Date.parse(d + "T12:00:00Z") + 86400_000).toISOString().slice(0, 10);
     const past = days.flatMap((d) => d.macro)
-      .filter((m) => Date.parse(m.time) < nowMs && (NQ_COUNTRY[m.country] || m.country === "한국"));
+      // 정적 파일에 실제치가 이미 박힌 이벤트는 다시 조회하지 않는다
+      .filter((m) => !m.actual && Date.parse(m.time) < nowMs && (NQ_COUNTRY[m.country] || m.country === "한국"));
     // 낫닥은 발표일보다 하루 뒤 날짜에 싣는 경우가 많다 — 당일과 다음날을 합쳐 매칭
     const etDates = [...new Set(past.flatMap((m) => [etDateOf(m.time), plus1(etDateOf(m.time))]))].sort().slice(-14);
     const ecoByDate = new Map<string, EcoRow[]>();
@@ -366,9 +379,24 @@ export async function GET(req: NextRequest) {
     if (!d) { d = { date: key, macro: [], earnings: [] }; byDay.set(key, d); }
     return d;
   };
-  for (const m of macro) {
-    const key = kstDate(new Date(m.time));
-    dayOf(key).macro.push(m);
+  // FF(이번 주, 예상치 있음) → 정적 데이터(과거 스크랩 + 미래 큐레이션) 순으로,
+  // 같은 날 같은 지표는 하나만 남긴다
+  const seen = new Set<string>();
+  const pushMacro = (m: MacroEvent) => {
+    const kd = kstDate(new Date(m.time));
+    const dk = kd + "|" + m.country + "|" + (m.ko ?? m.title);
+    if (seen.has(dk)) return;
+    seen.add(dk);
+    dayOf(kd).macro.push(m);
+  };
+  for (const m of macro) pushMacro(m);
+  {
+    const wStart = key === "week" ? kstDate(new Date()) : `${key}-01`;
+    const wEnd = key === "week" ? kstDate(new Date(Date.now() + 8 * 86400_000)) : `${key}-31`;
+    for (const m of STATIC_MACRO) {
+      const kd = kstDate(new Date(m.time));
+      if (kd >= wStart && kd <= wEnd) pushMacro({ ...m });
+    }
   }
   // 한국 확정 일정 (금통위·수출입동향) — 표시 범위 안의 것만
   const windowStart = key === "week" ? kstDate(new Date()) : dates[0] ?? "";

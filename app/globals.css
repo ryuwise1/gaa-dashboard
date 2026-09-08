@@ -1098,11 +1098,11 @@ a { color: var(--accent); }
   background: color-mix(in srgb, var(--accent) 4%, var(--bg));
   border-radius: 12px; padding: 11px 15px; margin-bottom: 12px;
 }
-.actions-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.actions-head { display: flex; align-items: baseline; gap: 6px; margin-bottom: 9px; }
 .actions-head h2 { font-size: 12.5px; font-weight: 800; margin: 0; }
-.actions-head .meta { font-size: 10.5px; color: var(--muted); }
-.actions ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
-.actions li { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 1.5; }
+.actions-head .cnt { font-size: 10.5px; font-weight: 800; color: var(--accent); }
+.actions ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.actions li { display: flex; align-items: baseline; gap: 8px; font-size: 12px; line-height: 1.55; }
 .act-type {
   flex: none; font-size: 10px; font-weight: 800; padding: 1.5px 7px; border-radius: 999px;
   background: var(--chip-bg); color: var(--chip-ink); min-width: 52px; text-align: center;
@@ -1126,14 +1126,30 @@ a { color: var(--accent); }
   font-size: 10.5px; font-weight: 700; color: var(--muted); padding: 0;
 }
 .story-toggle:hover { color: var(--ink-2); }
-.story-thesis.dim { margin: 4px 0 0; color: var(--muted); font-size: 11.5px; }
+
+/* 역할별 비중 — 스택 바 + 범례. 접혀 있어도 항상 보인다 */
+.story-bar {
+  display: flex; height: 14px; border-radius: 7px; overflow: hidden;
+  margin-top: 9px; background: var(--chip-bg);
+}
+.story-bar i { display: block; height: 100%; min-width: 2px; }
+.story-bar i + i { box-shadow: inset 1.5px 0 0 var(--bg); }
+.story-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; }
+.story-leg { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); white-space: nowrap; }
+.story-leg i { width: 8px; height: 8px; border-radius: 2.5px; flex: none; }
+.story-leg b { color: var(--ink-2); font-weight: 700; }
+
+/* 펼침 — 역할별 근거 개조식 */
+.story-bullets { list-style: none; margin: 0; padding: 0; min-width: 0; flex: 1; }
+.story-bullets li { position: relative; padding-left: 11px; line-height: 1.55; }
+.story-bullets li::before { content: "·"; position: absolute; left: 1px; font-weight: 800; color: var(--muted); }
 .story-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
 .story-head h2 { font-size: 13.5px; font-weight: 800; margin: 0; }
 .story-head .meta { font-size: 10.5px; color: var(--muted); }
-.story-thesis { margin: 6px 0 10px; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
+.story-thesis { margin: 12px 0 10px; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
 .story-thesis b { font-weight: 800; color: var(--ink); }
-.story-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.story-roles li { display: flex; align-items: baseline; gap: 8px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.story-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.story-roles > li { display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
 .story-badge {
   flex: none; font-size: 10px; font-weight: 800; padding: 1.5px 7px; border-radius: 999px;
   background: var(--chip-bg); color: var(--chip-ink); min-width: 52px; text-align: center;
@@ -1143,6 +1159,26 @@ a { color: var(--accent); }
 .story-badge.core { opacity: 0.8; }
 .story-roles b { flex: none; font-weight: 800; color: var(--ink-2); min-width: 38px; text-align: right; }
 .story-roles .story-line { min-width: 0; }
+
+/* ── 배당 수익 — 매매 내역 탭 하단 ── */
+.div-sec { margin-top: 14px; }
+.div-sec .meta b.gain { font-weight: 800; }
+.div-row {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 9px 2px; border: 0; background: none; cursor: pointer; text-align: left;
+  box-shadow: inset 0 -1px 0 var(--hairline); color: inherit;
+}
+.div-row:hover { background: color-mix(in srgb, var(--chip-bg) 45%, transparent); }
+.div-id { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 1px; }
+.div-id b { font-size: 12.5px; font-weight: 700; }
+.div-sub { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 10.5px; color: var(--muted); }
+.div-amt { flex: none; font-size: 12.5px; font-weight: 800; }
+.div-detail { padding: 6px 2px 10px 36px; box-shadow: inset 0 -1px 0 var(--hairline); }
+.div-ev {
+  display: grid; grid-template-columns: 44px minmax(0, 1fr) auto auto;
+  gap: 12px; align-items: baseline; padding: 2.5px 0; font-size: 11.5px; color: var(--muted);
+}
+.div-ev .u { font-weight: 700; }
 
 /* 플랜 행 클릭 → 매수 근거 */
 .plan-row[data-clickable] { cursor: pointer; }
@@ -1243,6 +1279,13 @@ a { color: var(--accent); }
   line-height: 1.65;
   color: var(--muted);
 }
+.alloc-note summary { cursor: pointer; list-style: none; }
+.alloc-note summary::-webkit-details-marker { display: none; }
+.alloc-note summary i { font-style: normal; font-size: 10.5px; opacity: 0.75; }
+.alloc-note summary:hover i { color: var(--ink-2); opacity: 1; }
+.alloc-note ul { list-style: none; margin: 6px 0 0; padding: 0; }
+.alloc-note ul li { position: relative; padding-left: 11px; }
+.alloc-note ul li::before { content: "·"; position: absolute; left: 1px; font-weight: 800; }
 .alloc-note b { color: var(--ink-2); font-weight: 700; }
 .alloc-note em { font-style: normal; color: var(--ink-2); font-weight: 600; }
 

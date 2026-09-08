@@ -25,6 +25,7 @@ import Allocation from "@/components/Allocation";
 import ChangeLog from "@/components/ChangeLog";
 import StoryBlock from "@/components/StoryBlock";
 import ActionBar from "@/components/ActionBar";
+import Dividends from "@/components/Dividends";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
@@ -36,7 +37,7 @@ const TAB_SLUGS: Record<string, Tab> = {
   holdings: "보유 현황", plan: "매수·매도 플랜", apmp: "AP·MP", trades: "매매 내역",
   signals: "오늘의 분석", calendar: "캘린더", notes: "회의록",
 };
-const TEAM_ONLY_TABS: Tab[] = ["오늘의 분석", "캘린더", "회의록"];
+const TEAM_ONLY_TABS: Tab[] = ["오늘의 분석", "회의록"];
 type Figure = "현재가" | "평가금";
 type Sort = "평가금액" | "수익률" | "당일";
 
@@ -292,8 +293,8 @@ export default function Dashboard() {
   // 공개판(선배 공지용)은 열람 화면만: 보유 현황·플랜·매매 내역·비중.
   // 캘린더(담당자 표 생성기 포함)·회의록·주간보고는 팀 관리 도구라 팀 모드 전용.
   const TABS: Tab[] = [
-    "보유 현황", "매수·매도 플랜", "AP·MP", "매매 내역",
-    ...(teamMode ? (["오늘의 분석", "캘린더", "회의록"] as Tab[]) : []),
+    "보유 현황", "매수·매도 플랜", "AP·MP", "매매 내역", "캘린더",
+    ...(teamMode ? (["오늘의 분석", "회의록"] as Tab[]) : []),
     "보유 비중",
   ];
   const tabCount: Record<Tab, string> = {
@@ -406,7 +407,7 @@ export default function Dashboard() {
                 if (confirm("공개판(선배 공지용) 화면으로 전환할까요?\n다시 팀 모드로 돌아오려면 주소 뒤에 ?team 을 붙여 접속하면 됩니다.")) {
                   localStorage.removeItem("gaa-team");
                   setTeamMode(false);
-                  setTab((c) => (c === "캘린더" || c === "회의록" ? "보유 현황" : c));
+                  setTab((c) => (c === "오늘의 분석" || c === "회의록" ? "보유 현황" : c));
                 }
               }}
             >
@@ -589,8 +590,7 @@ export default function Dashboard() {
 
           {tab === "보유 현황" && (
             <section className="section" role="tabpanel" aria-label="보유 현황">
-              {/* 팀원에겐 매일 같은 내용이라 접을 수 있게 — 공개판은 항상 펼침 */}
-              <StoryBlock collapsible={teamMode} />
+              <StoryBlock />
               <div className="section-head">
                 <h2 className="sr-only">보유 현황</h2>
                 <span className="meta num">{rows.length > 0 ? quoteNote : ""}</span>
@@ -857,11 +857,16 @@ export default function Dashboard() {
 
           {tab === "AP·MP" && <Allocation rows={rows} unit={unit} usdkrw={fx} />}
 
-          {tab === "매매 내역" && <TradeLog unit={unit} usdkrw={fx} />}
+          {tab === "매매 내역" && (
+            <>
+              <TradeLog unit={unit} usdkrw={fx} />
+              <Dividends />
+            </>
+          )}
 
           {tab === "오늘의 분석" && teamMode && <DailySignals />}
 
-          {tab === "캘린더" && teamMode && <Calendar />}
+          {tab === "캘린더" && <Calendar team={teamMode} />}
 
           {tab === "회의록" && teamMode && <MeetingNotes rows={rows} />}
 

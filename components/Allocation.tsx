@@ -117,12 +117,14 @@ export default function Allocation({
         </span>
       </div>
 
-      <p className="alloc-note">
-        <b>MP</b>는 전략상 목표 비중, <b>AP</b>는 실제 계좌 비중이다. 괴리가 같아도 원인이
-        <em> 미집행</em>(아직 안 샀다)·<em>집행 부족</em>(목표만큼 못 채웠다)이냐
-        <em> 드리프트</em>(사놓았는데 가격이 움직였다)냐에 따라 할 일이 정반대라 나눠서 표시한다.
-        비중은 모두 <b>총자산 {fmtUsd(nav)}</b>(평가액+현금) 대비다.
-      </p>
+      <details className="alloc-note">
+        <summary><b>MP</b> 목표 비중 · <b>AP</b> 실제 비중 — 총자산 {fmtUsd(nav)} 대비 <i>· 용어 설명</i></summary>
+        <ul>
+          <li><em>미집행</em> — 아직 안 샀다 → 집행이 할 일</li>
+          <li><em>집행 부족</em> — 목표만큼 못 채웠다 → 잔여 매수가 할 일</li>
+          <li><em>드리프트</em> — 사놓았는데 가격이 움직였다 → 밴드(±25%) 이탈 시 리밸런싱</li>
+        </ul>
+      </details>
 
       <div className="alloc-head">
         <span>종목</span>

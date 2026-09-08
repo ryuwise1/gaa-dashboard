@@ -37,6 +37,10 @@ const DICT: Entry[] = [
 
   // ── 고용 ──
   { match: "Non-Farm Employment Change", ko: "비농업 고용", desc: "미국 고용의 대표 지표 — 발표 순간 변동성 큼" },
+  { match: "Nonfarm Payrolls", ko: "비농업 고용", desc: "미국 고용의 대표 지표 — 발표 순간 변동성 큼" },
+  { match: "Initial Jobless Claims", ko: "신규 실업수당청구", desc: "매주 나오는 고용 냉각 신호 — 늘면 인하 기대↑" },
+  { match: "ISM Non-Manufacturing PMI", ko: "ISM 서비스업 PMI", desc: "미국 경제의 대부분은 서비스업" },
+  { match: "Michigan Consumer Sentiment", ko: "미시간대 소비자심리지수", desc: "소비 심리 + 기대인플레 서베이" },
   { match: "ADP Non-Farm", ko: "ADP 민간고용", desc: "비농업 고용의 이틀 전 예고편" },
   { match: "Unemployment Claims", ko: "신규 실업수당청구", desc: "매주 나오는 고용 냉각 신호 — 늘면 인하 기대↑" },
   { match: "Unemployment Rate", ko: "실업률", desc: "고용 시장 체온계" },

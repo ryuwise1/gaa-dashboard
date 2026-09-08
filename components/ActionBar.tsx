@@ -27,7 +27,7 @@ export default function ActionBar() {
     <section className="actions" aria-label="오늘 할 일">
       <div className="actions-head">
         <h2>오늘 할 일</h2>
-        <span className="meta">예약된 집행·감시 룰 — 완료되면 목록에서 내립니다</span>
+        <span className="cnt num">{items.length}</span>
       </div>
       <ul>
         {items.map((it) => {

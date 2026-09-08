@@ -146,8 +146,17 @@ function EarnItem({ e }: { e: EarningsEvent }) {
 
 /* ──────────────────────────────────────────────────────────────── */
 
-export default function Calendar() {
-  const [view, setView] = useState<"주간" | "월간">("주간");
+/** 데이터가 준비된 범위 — 과거 스크랩 7월부터, 미래 큐레이션 12월까지 */
+const MONTH_MIN = "2026-07";
+const MONTH_MAX = "2026-12";
+
+const addMonth = (ym: string, delta: number) => {
+  const [y, m] = ym.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 7);
+};
+
+export default function Calendar({ team = false }: { team?: boolean }) {
+  const [view, setView] = useState<"주간" | "월간">("월간");
   const [week, setWeek] = useState<CalDay[] | null>(null);
   const [month, setMonth] = useState<string>(kstToday().slice(0, 7));
   const [monthDays, setMonthDays] = useState<Record<string, CalDay[]>>({});
@@ -170,13 +179,20 @@ export default function Calendar() {
     } catch {}
   }, []);
 
+  // 이번 달 + 앞뒤 달을 미리 받아 둔다 — 넘길 때 기다리지 않게
   useEffect(() => {
-    if (view !== "월간" || monthDays[month]) return;
-    fetch(`/api/calendar?month=${month}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject()))
-      .then((d) => setMonthDays((prev) => ({ ...prev, [month]: d.days ?? [] })))
-      .catch(() => {});
-  }, [view, month, monthDays]);
+    const wanted = [month, addMonth(month, 1), addMonth(month, -1)]
+      .filter((m) => m >= MONTH_MIN && m <= MONTH_MAX)
+      .filter((m) => !monthDays[m]);
+    if (!wanted.length) return;
+    for (const m of wanted) {
+      fetch(`/api/calendar?month=${m}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d) => setMonthDays((prev) => (prev[m] ? prev : { ...prev, [m]: d.days ?? [] })))
+        .catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [month]);
 
   const setPerson = (date: string, key: "lead" | "follow", v: string) => {
     setRoster((prev) => {
@@ -231,8 +247,10 @@ export default function Calendar() {
   }, [month, monthDays]);
 
   const shiftMonth = (delta: number) => {
-    const [y, m] = month.split("-").map(Number);
-    setMonth(new Date(Date.UTC(y, m - 1 + delta, 1)).toISOString().slice(0, 7));
+    const next = addMonth(month, delta);
+    if (next < MONTH_MIN || next > MONTH_MAX) return;
+    setSelDay(null);
+    setMonth(next);
   };
 
   return (
@@ -245,12 +263,12 @@ export default function Calendar() {
         </div>
         {view === "월간" && (
           <div className="cal-nav num">
-            <button onClick={() => shiftMonth(-1)} aria-label="이전 달">‹</button>
+            <button onClick={() => shiftMonth(-1)} disabled={month <= MONTH_MIN} aria-label="이전 달">‹</button>
             <b>{month.replace("-", ".")}</b>
-            <button onClick={() => shiftMonth(1)} aria-label="다음 달">›</button>
+            <button onClick={() => shiftMonth(1)} disabled={month >= MONTH_MAX} aria-label="다음 달">›</button>
           </div>
         )}
-        {view === "주간" && week != null && week.length > 0 && (
+        {team && view === "주간" && week != null && week.length > 0 && (
           <button className="btn cal-make" onClick={() => setBuilder((b) => !b)} aria-expanded={builder}>
             {builder ? "표 만들기 닫기" : "주간 표 만들기"}
           </button>
@@ -260,7 +278,7 @@ export default function Calendar() {
       {failed && <p className="log-empty">캘린더를 불러오지 못했습니다. 잠시 후 새로고침해 주세요.</p>}
       {!failed && week == null && <p className="log-empty">캘린더 불러오는 중…</p>}
 
-      {view === "주간" && builder && week != null && (
+      {team && view === "주간" && builder && week != null && (
         <div className="cal-builder">
           <p className="cal-builder-hint">
             날짜별 담당자를 적고 <b>표 복사</b>를 누르면 회의 자료용 표가 클립보드에 담깁니다.
@@ -389,8 +407,8 @@ export default function Calendar() {
           })()}
           <p className="log-foot">
             날짜 칸을 누르면 아래에 그날의 상세(예상·실제치 포함)가 표시됩니다.
-            월간 뷰는 어닝(Nasdaq)과 한국 확정 일정 중심입니다 — 해외 매크로 피드는 이번 주 분량만 제공되어
-            다른 주에는 표시되지 않습니다.
+            7월부터 12월까지 제공합니다 — 지난 발표에는 실제치·판정이 붙고,
+            앞으로의 일정은 각 기관 공식 발표 일정 기준(일부 근사)이며 발표 주가 되면 정확한 일시로 갱신됩니다.
           </p>
         </div>
       )}

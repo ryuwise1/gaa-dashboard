@@ -1,0 +1,136 @@
+{
+  "_comment": "미래 매크로 일정 (9/14 이후) — 무료 피드가 이번 주 분량만 제공되어, 각 기관의 공식 발표 일정으로 큐레이션한다. 출처: Fed FOMC 캘린더, BLS 2026 release schedule, BEA, ECB·BOE·BOJ 공식 일정 (2026-09-08 기준). 소매판매·PMI속보치·유로존CPI속보치·GDP확정/잠정치 일부는 관례 패턴 기반 근사(±1일)이며, 발표 주가 되면 ForexFactory 주간 피드가 정확한 일시로 대체한다. 한국 일정은 kr-events.json에서 관리.",
+  "days": {
+    "2026-09-16": [
+      { "time": "2026-09-16T08:30:00-04:00", "country": "미국", "title": "Retail Sales", "ko": "소매판매", "desc": "소비 경기 체온계 (8월분)", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-09-16T14:00:00-04:00", "country": "미국", "title": "FOMC Statement", "ko": "FOMC 기준금리 결정", "desc": "9/15~16 회의 — 점도표(SEP) 포함, 14:30 의장 기자회견", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-09-17": [
+      { "time": "2026-09-17T12:00:00+01:00", "country": "영국", "title": "BoE Interest Rate Decision", "ko": "영란은행 기준금리", "desc": "영국 통화정책", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-09-18": [
+      { "time": "2026-09-18T12:00:00+09:00", "country": "일본", "title": "BoJ Interest Rate Decision", "ko": "일본은행 기준금리", "desc": "9/17~18 회의 — 엔 캐리 흐름·글로벌 유동성에 영향", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-09-23": [
+      { "time": "2026-09-23T09:45:00-04:00", "country": "미국", "title": "Flash Manufacturing PMI", "ko": "제조업 PMI 속보치", "desc": "9월 경기를 가장 먼저 보여주는 서베이 (서비스업 동시 발표)", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-09-24": [
+      { "time": "2026-09-24T08:30:00-04:00", "country": "미국", "title": "Final GDP", "ko": "GDP 확정치", "desc": "2분기 성장률 확정 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-09-25": [
+      { "time": "2026-09-25T08:30:00-04:00", "country": "미국", "title": "Core PCE Price Index", "ko": "근원 PCE 물가", "desc": "연준 공식 물가지표 (8월분) — 금리 경로에 직결 (TLT·IEF)", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-09-30": [
+      { "time": "2026-09-30T09:00:00+08:00", "country": "중국", "title": "Manufacturing PMI", "ko": "제조업 PMI", "desc": "중국 국가통계국 — 코스피·원자재 수요에 영향", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-01": [
+      { "time": "2026-10-01T11:00:00+02:00", "country": "유로존", "title": "CPI Flash Estimate", "ko": "소비자물가(CPI) 속보치", "desc": "9월 유로존 물가 선행 신호 — ECB 경로", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-10-01T10:00:00-04:00", "country": "미국", "title": "ISM Manufacturing PMI", "ko": "ISM 제조업 PMI", "desc": "50 위면 확장, 아래면 위축", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-02": [
+      { "time": "2026-10-02T08:30:00-04:00", "country": "미국", "title": "Nonfarm Payrolls", "ko": "비농업 고용 (고용보고서)", "desc": "9월분 — 실업률·시간당 임금 동시 발표, 발표 순간 변동성 큼", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-05": [
+      { "time": "2026-10-05T10:00:00-04:00", "country": "미국", "title": "ISM Non-Manufacturing PMI", "ko": "ISM 서비스업 PMI", "desc": "미국 경제의 대부분은 서비스업", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-07": [
+      { "time": "2026-10-07T14:00:00-04:00", "country": "미국", "title": "FOMC Meeting Minutes", "ko": "FOMC 의사록", "desc": "9월 회의 내부 논의 공개 — 인상·인하 힌트", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-14": [
+      { "time": "2026-10-14T08:30:00-04:00", "country": "미국", "title": "CPI", "ko": "소비자물가(CPI)", "desc": "9월분 — 근원 CPI 동시 발표, 금리 기대에 직결", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-15": [
+      { "time": "2026-10-15T08:30:00-04:00", "country": "미국", "title": "PPI", "ko": "생산자물가(PPI)", "desc": "9월분 — 소비자물가의 선행 지표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-16": [
+      { "time": "2026-10-16T08:30:00-04:00", "country": "미국", "title": "Retail Sales", "ko": "소매판매", "desc": "9월분 소비 경기", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-19": [
+      { "time": "2026-10-19T10:00:00+08:00", "country": "중국", "title": "GDP", "ko": "GDP 성장률 (3분기)", "desc": "산업생산·소매판매 동시 발표 — 반도체 수요·코스피에 영향", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-23": [
+      { "time": "2026-10-23T09:45:00-04:00", "country": "미국", "title": "Flash Manufacturing PMI", "ko": "제조업 PMI 속보치", "desc": "10월 경기 첫 서베이 (서비스업 동시 발표)", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-28": [
+      { "time": "2026-10-28T14:00:00-04:00", "country": "미국", "title": "FOMC Statement", "ko": "FOMC 기준금리 결정", "desc": "10/27~28 회의 — 14:30 의장 기자회견", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-29": [
+      { "time": "2026-10-29T08:30:00-04:00", "country": "미국", "title": "Advance GDP", "ko": "GDP 속보치", "desc": "3분기 성장률 첫 발표 — FOMC 다음날 데이터 슈퍼데이", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-10-29T08:30:00-04:00", "country": "미국", "title": "Core PCE Price Index", "ko": "근원 PCE 물가", "desc": "9월분 — GDP와 동시 발표", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-10-29T14:15:00+01:00", "country": "유로존", "title": "ECB Interest Rate Decision", "ko": "ECB 기준금리", "desc": "유로존 통화정책 — EUAD 등 유럽 자산에 영향", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-10-30": [
+      { "time": "2026-10-30T12:00:00+09:00", "country": "일본", "title": "BoJ Interest Rate Decision", "ko": "일본은행 기준금리", "desc": "10/29~30 회의 — 전망 보고서 동시 공개", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-10-30T11:00:00+01:00", "country": "유로존", "title": "CPI Flash Estimate", "ko": "소비자물가(CPI) 속보치", "desc": "10월 유로존 물가", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-02": [
+      { "time": "2026-11-02T10:00:00-05:00", "country": "미국", "title": "ISM Manufacturing PMI", "ko": "ISM 제조업 PMI", "desc": "50 위면 확장, 아래면 위축", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-04": [
+      { "time": "2026-11-04T10:00:00-05:00", "country": "미국", "title": "ISM Non-Manufacturing PMI", "ko": "ISM 서비스업 PMI", "desc": "미국 경제의 대부분은 서비스업", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-05": [
+      { "time": "2026-11-05T12:00:00+00:00", "country": "영국", "title": "BoE Interest Rate Decision", "ko": "영란은행 기준금리", "desc": "영국 통화정책", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-06": [
+      { "time": "2026-11-06T08:30:00-05:00", "country": "미국", "title": "Nonfarm Payrolls", "ko": "비농업 고용 (고용보고서)", "desc": "10월분 — 실업률·시간당 임금 동시 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-10": [
+      { "time": "2026-11-10T08:30:00-05:00", "country": "미국", "title": "CPI", "ko": "소비자물가(CPI)", "desc": "10월분 — 근원 CPI 동시 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-13": [
+      { "time": "2026-11-13T08:30:00-05:00", "country": "미국", "title": "PPI", "ko": "생산자물가(PPI)", "desc": "10월분", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-17": [
+      { "time": "2026-11-17T08:30:00-05:00", "country": "미국", "title": "Retail Sales", "ko": "소매판매", "desc": "10월분 소비 경기", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-18": [
+      { "time": "2026-11-18T14:00:00-05:00", "country": "미국", "title": "FOMC Meeting Minutes", "ko": "FOMC 의사록", "desc": "10월 회의 내부 논의 공개", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-25": [
+      { "time": "2026-11-25T08:30:00-05:00", "country": "미국", "title": "Prelim GDP", "ko": "GDP 잠정치", "desc": "3분기 성장률 수정 발표", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-11-25T08:30:00-05:00", "country": "미국", "title": "Core PCE Price Index", "ko": "근원 PCE 물가", "desc": "10월분 — 추수감사절 전 몰아서 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-11-30": [
+      { "time": "2026-11-30T09:00:00+08:00", "country": "중국", "title": "Manufacturing PMI", "ko": "제조업 PMI", "desc": "중국 국가통계국", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-01": [
+      { "time": "2026-12-01T10:00:00-05:00", "country": "미국", "title": "ISM Manufacturing PMI", "ko": "ISM 제조업 PMI", "desc": "50 위면 확장, 아래면 위축", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-02": [
+      { "time": "2026-12-02T11:00:00+01:00", "country": "유로존", "title": "CPI Flash Estimate", "ko": "소비자물가(CPI) 속보치", "desc": "11월 유로존 물가", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-03": [
+      { "time": "2026-12-03T10:00:00-05:00", "country": "미국", "title": "ISM Non-Manufacturing PMI", "ko": "ISM 서비스업 PMI", "desc": "미국 경제의 대부분은 서비스업", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-04": [
+      { "time": "2026-12-04T08:30:00-05:00", "country": "미국", "title": "Nonfarm Payrolls", "ko": "비농업 고용 (고용보고서)", "desc": "11월분 — 실업률·시간당 임금 동시 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-09": [
+      { "time": "2026-12-09T14:00:00-05:00", "country": "미국", "title": "FOMC Statement", "ko": "FOMC 기준금리 결정", "desc": "12/8~9 회의 — 점도표(SEP) 포함, 14:30 의장 기자회견", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-10": [
+      { "time": "2026-12-10T08:30:00-05:00", "country": "미국", "title": "CPI", "ko": "소비자물가(CPI)", "desc": "11월분 — 근원 CPI 동시 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-15": [
+      { "time": "2026-12-15T08:30:00-05:00", "country": "미국", "title": "PPI", "ko": "생산자물가(PPI)", "desc": "11월분", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-12-15T08:30:00-05:00", "country": "미국", "title": "Retail Sales", "ko": "소매판매", "desc": "11월분 소비 경기", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-17": [
+      { "time": "2026-12-17T14:15:00+01:00", "country": "유로존", "title": "ECB Interest Rate Decision", "ko": "ECB 기준금리", "desc": "유로존 통화정책", "impact": "High", "forecast": "", "previous": "" },
+      { "time": "2026-12-17T12:00:00+00:00", "country": "영국", "title": "BoE Interest Rate Decision", "ko": "영란은행 기준금리", "desc": "영국 통화정책", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-18": [
+      { "time": "2026-12-18T12:00:00+09:00", "country": "일본", "title": "BoJ Interest Rate Decision", "ko": "일본은행 기준금리", "desc": "12/17~18 회의", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-22": [
+      { "time": "2026-12-22T08:30:00-05:00", "country": "미국", "title": "Final GDP", "ko": "GDP 확정치", "desc": "3분기 성장률 확정 발표", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-23": [
+      { "time": "2026-12-23T08:30:00-05:00", "country": "미국", "title": "Core PCE Price Index", "ko": "근원 PCE 물가", "desc": "11월분 — 연말 마지막 핵심 물가", "impact": "High", "forecast": "", "previous": "" }
+    ],
+    "2026-12-31": [
+      { "time": "2026-12-31T09:00:00+08:00", "country": "중국", "title": "Manufacturing PMI", "ko": "제조업 PMI", "desc": "중국 국가통계국", "impact": "High", "forecast": "", "previous": "" }
+    ]
+  }
+}
