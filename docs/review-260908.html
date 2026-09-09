@@ -1,0 +1,216 @@
+<title>GLIF 자산운용팀 운용 리뷰</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;700&display=swap">
+<style>
+  /* 보드 다크 테마를 그대로 잇는 단일 테마 — 팀 아이덴티티에 커밋 */
+  :root{
+    --bg:#12151c; --card:#1c212b; --card2:#232936; --hair:#323946;
+    --ink:#eef1f6; --mut:#949eac; --blue:#60a5fa; --gain:#f04452;
+    --green:#3fb68b; --amber:#f5a623; --violet:#9b7bff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans KR","Malgun Gothic",system-ui,sans-serif;
+    font-size:15px; line-height:1.65;
+  }
+  .num{font-family:"IBM Plex Mono","IBM Plex Sans KR",monospace; font-variant-numeric:tabular-nums}
+  .wrap{max-width:880px; margin:0 auto; padding:44px 24px 64px}
+  a{color:var(--blue); text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ── 헤더 ── */
+  header h1{margin:0; font-size:30px; line-height:1.25; letter-spacing:-.01em; text-wrap:balance}
+  header .glif{color:var(--blue); font-style:italic; font-weight:700; letter-spacing:.02em}
+  header .sub{margin:8px 0 0; color:var(--mut); font-size:14px}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:26px 0 0}
+  .stat{border:1px solid var(--hair); background:var(--card); border-radius:12px; padding:13px 16px}
+  .stat .k{font-size:11px; color:var(--mut); letter-spacing:.06em}
+  .stat .v{font-size:21px; font-weight:700; margin-top:2px}
+  .stat .v.up{color:var(--gain)}
+  @media (max-width:640px){ .stats{grid-template-columns:repeat(2,1fr)} }
+
+  /* ── 섹션 공통 ── */
+  section{margin-top:52px}
+  .eyebrow{font-size:12px; font-weight:700; color:var(--blue); letter-spacing:.1em}
+  h2{margin:6px 0 6px; font-size:22px; letter-spacing:-.01em; text-wrap:balance}
+  .lede{margin:0 0 22px; color:var(--mut); font-size:14px; max-width:62ch}
+  b{color:var(--ink)}
+
+  /* ── 타임라인 ── */
+  .tl{position:relative; padding-left:30px}
+  .tl::before{content:""; position:absolute; left:9px; top:8px; bottom:8px; width:2px;
+    background:linear-gradient(var(--blue), var(--violet), var(--gain))}
+  .phase{position:relative; margin-bottom:26px}
+  .phase::before{content:""; position:absolute; left:-27px; top:7px; width:12px; height:12px;
+    border-radius:50%; background:var(--bg); border:3px solid var(--pc,var(--blue))}
+  .phase .when{font-size:12px; font-weight:700; color:var(--pc,var(--blue)); letter-spacing:.05em}
+  .phase h3{margin:3px 0 8px; font-size:17px}
+  .phase .body{border:1px solid var(--hair); background:var(--card); border-radius:12px; padding:14px 18px}
+  .phase .stance{margin:0 0 10px; font-size:14px; color:var(--ink)}
+  .phase ul{margin:0; padding:0; list-style:none; color:var(--mut); font-size:13.5px}
+  .phase li{position:relative; padding-left:14px; margin:4px 0}
+  .phase li::before{content:"·"; position:absolute; left:2px; font-weight:700}
+
+  /* ── 포트 구조 바 ── */
+  .bar{display:flex; height:18px; border-radius:9px; overflow:hidden; background:var(--card2); margin:4px 0 12px}
+  .bar i{min-width:3px}
+  .bar i+i{box-shadow:inset 2px 0 0 var(--bg)}
+  .legend{display:flex; flex-wrap:wrap; gap:6px 18px; font-size:13px; color:var(--mut)}
+  .legend span{display:inline-flex; align-items:center; gap:6px; white-space:nowrap}
+  .legend i{width:9px; height:9px; border-radius:3px}
+  .legend b{font-weight:700}
+
+  /* ── 방향성 리스트 ── */
+  .dir{display:grid; gap:10px}
+  .dir .row{display:flex; gap:14px; align-items:baseline; border:1px solid var(--hair);
+    background:var(--card); border-radius:12px; padding:13px 18px}
+  .dir .tag{flex:none; font-size:11px; font-weight:700; padding:2px 9px; border-radius:999px; letter-spacing:.03em}
+  .dir .t-keep{background:rgba(96,165,250,.14); color:var(--blue)}
+  .dir .t-build{background:rgba(63,182,139,.15); color:var(--green)}
+  .dir .t-watch{background:rgba(245,166,35,.15); color:var(--amber)}
+  .dir p{margin:0; font-size:13.5px; color:var(--mut)}
+  .dir p b{display:block; font-size:14.5px; margin-bottom:1px}
+
+  /* ── 신입 활동 ── */
+  .grid2{display:grid; grid-template-columns:1fr 300px; gap:14px; align-items:start}
+  @media (max-width:700px){ .grid2{grid-template-columns:1fr} }
+  .steps{display:grid; gap:10px}
+  .step{display:flex; gap:14px; border:1px solid var(--hair); background:var(--card); border-radius:12px; padding:14px 18px}
+  .step .n{flex:none; width:30px; height:30px; border-radius:50%; display:grid; place-items:center;
+    background:rgba(96,165,250,.14); color:var(--blue); font-weight:700; font-size:14px}
+  .step p{margin:0; font-size:13.5px; color:var(--mut)}
+  .step p b{display:block; font-size:14.5px; margin-bottom:1px}
+  .fund{border:1px solid rgba(240,68,82,.4); background:var(--card2); border-radius:12px; padding:20px; text-align:center}
+  .fund .k{font-size:12.5px; color:var(--mut)}
+  .fund .v{font-size:38px; font-weight:700; color:var(--gain); margin:4px 0}
+  .fund p{margin:6px 0 0; font-size:13px; color:var(--ink)}
+
+  footer{margin-top:56px; padding-top:16px; border-top:1px solid var(--hair);
+    font-size:12.5px; color:var(--mut)}
+  @media (prefers-reduced-motion:no-preference){
+    .phase .body{transition:border-color .15s}
+    .phase .body:hover{border-color:var(--pc,var(--blue))}
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span class="glif">GLIF</span> 자산운용팀 운용 리뷰</h1>
+    <p class="sub">2026. 7. 30 운용 개시 → 9. 8 현재 · 가상 AUM $500,000 · 모의운용</p>
+    <div class="stats num">
+      <div class="stat"><div class="k">총자산</div><div class="v">$525.9K</div></div>
+      <div class="stat"><div class="k">운용 개시 후</div><div class="v up">+5.2%</div></div>
+      <div class="stat"><div class="k">PME 벤치마크 대비</div><div class="v up">+4.0%p</div></div>
+      <div class="stat"><div class="k">매매 · 배당</div><div class="v">35건 · $743</div></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="eyebrow">01 · 지금까지의 스탠스</div>
+    <h2>6주의 운용, 네 번의 국면</h2>
+    <p class="lede">일관된 원칙은 두 가지입니다 — 모든 판단을 근거와 함께 기록하고, 매매는 정해둔 규칙(밴드·반증 조건)에 따라 집행합니다.</p>
+
+    <div class="tl">
+      <div class="phase" style="--pc:var(--blue)">
+        <div class="when">국면 1 · 7월 말 ~ 8월 초</div>
+        <h3>설계 먼저, 집행은 규칙적으로</h3>
+        <div class="body">
+          <p class="stance">종목보다 프레임을 먼저 확정했습니다 — 코어 40% / 알파 15% / 헤지 22.5% / 분산 17.5% / 현금 5%. 현금 보유도 하나의 액티브 베팅으로 보고, 코어(VT)부터 규칙적으로 채웠습니다.</p>
+          <ul>
+            <li>1차 회의(7/28) 킥오프 — 테제: <b>AI 투자 사이클의 메모리 병목</b>, 공급 측(삼성전자·SK하이닉스)과 수요 측(MSFT·META)을 함께 편입</li>
+            <li>달러 기준 운용 원칙 확정 — 국내주식 취득원가의 환율은 체결 시점에 고정</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase" style="--pc:var(--blue)">
+        <div class="when">국면 2 · 8월</div>
+        <h3>논지가 실적으로 검증되고, 규칙이 작동하기 시작</h3>
+        <div class="body">
+          <p class="stance">QCOM·AAPL 실적에서 "메모리 가격 상승 = 세트·팹리스 마진 압박"이 확인되며 메인 논지가 검증됐습니다. 급등에는 밴드 룰로 익절하고, 조정에는 계획된 자리를 채웠습니다.</p>
+          <ul>
+            <li>첫 익절(8/5 SK하이닉스) — 목표 대비 ±25% 밴드 룰의 첫 작동</li>
+            <li>유럽 방산(EUAD)·금리 바벨(TLT·IEF ↔ 은행) 완성, 8/19 칩 조정엔 계획 매수</li>
+            <li>메모리 역상관 헤지 확대 — HPQ는 실적 쇼크가 오히려 헤지 성격의 실증이라 판단해 반전 확인 후 편입</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase" style="--pc:var(--violet)">
+        <div class="when">국면 3 · 8월 말 ~ 9월 초</div>
+        <h3>매크로 전환에 보류·축소·확장으로 대응</h3>
+        <div class="body">
+          <p class="stance">잭슨홀 매파 선회(8/28)와 우크라이나 휴전 협상 국면 — 근거가 후퇴한 자리는 보류·축소하고, 새 촉매가 확인된 자리는 두 번째 알파로 확장했습니다.</p>
+          <ul>
+            <li>인하 수혜 KRE 편입 보류, VT 잔여 미집행 — "근거가 약해지면 사지 않는다"</li>
+            <li>유럽 방산 절반 축소 결정 — 재무장 촉매 약화, 잔여는 협상 번복 대비 유지</li>
+            <li><b>알파 ② AI 보안 신설</b> — GPT-6 Astra의 사이버보안 'Critical' 등급(9/3)을 촉매로 탐지 층(CRWD)·복구 층(RBRK) 편입 결정</li>
+            <li>SK하이닉스 증액 검토는 반증 조건(코스피 7,000 종가 유지) 미충족으로 당일 철회 — 규칙이 먼저 작동한 사례</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="phase" style="--pc:var(--gain)">
+        <div class="when">국면 4 · 지금</div>
+        <h3>세대 전환 — 20기의 스토리를 실을 준비</h3>
+        <div class="body">
+          <p class="stance">코어·현금 비중은 다음 기수의 신규 스토리에 배정할 재원으로 규정했습니다. 방산·코어 축소 대금과 배당 인컴을 여기에 모으고 있습니다.</p>
+          <ul>
+            <li>배당 자동 재투자 정책 채택 — 수령 배당($743)은 SGOV로 재투자</li>
+            <li>보드 고도화 — 캘린더 7~12월 확장(우리 매매·회의 오버레이), 팀 비밀번호 게이트, 배당 집계</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">02 · 현재 포트 구조</div>
+    <h2>역할별 목표 비중</h2>
+    <div class="bar" role="img" aria-label="역할별 목표 비중 막대">
+      <i style="width:15%; background:var(--gain)" title="메인 알파 15%"></i>
+      <i style="width:4%; background:var(--green)" title="알파 ② 4%"></i>
+      <i style="width:10%; background:var(--violet)" title="헤지 ① 10%"></i>
+      <i style="width:12.5%; background:#ff7bab" title="헤지 ② 12.5%"></i>
+      <i style="width:13.8%; background:var(--amber)" title="분산 13.8%"></i>
+      <i style="width:44.7%; background:var(--blue)" title="코어·현금 44.7%"></i>
+    </div>
+    <div class="legend num">
+      <span><i style="background:var(--gain)"></i>메인 알파 <b>15%</b></span>
+      <span><i style="background:var(--green)"></i>알파 ② <b>4%</b></span>
+      <span><i style="background:var(--violet)"></i>헤지 ① <b>10%</b></span>
+      <span><i style="background:#ff7bab"></i>헤지 ② <b>12.5%</b></span>
+      <span><i style="background:var(--amber)"></i>분산 <b>13.8%</b></span>
+      <span><i style="background:var(--blue)"></i>코어·현금 <b>44.7%</b></span>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">03 · 앞으로의 방향</div>
+    <h2>유지할 것, 만들 것, 지켜볼 것</h2>
+    <div class="dir">
+      <div class="row"><span class="tag t-keep">유지</span><p><b>메모리 병목 테제</b>HBM 논지는 유효합니다. 급등 시 밴드 룰 익절, 반증 조건(코스피 7,000 하회 마감 등)은 편입 때 미리 적어 둡니다.</p></div>
+      <div class="row"><span class="tag t-build">확장</span><p><b>AI 보안 슬리브 완성</b>1차 절반 편입 후, −5% 눌림 또는 Fal.Con 소화를 확인하고 2차를 집행해 총 4%를 채웁니다.</p></div>
+      <div class="row"><span class="tag t-build">확장</span><p><b>알파 ③ — 20기의 신규 스토리</b>코어 축소로 확보한 재원을 다음 기수가 제안하는 테제에 배정합니다. 승인되면 보드 스토리 블록에 정식 등재됩니다.</p></div>
+      <div class="row"><span class="tag t-watch">감시</span><p><b>금리 룰</b>미 10년물이 5.0%를 상향 돌파하면 TLT 절반 축소를 재검토합니다. 매파 국면이 이어지는 한 인하 베팅은 늘리지 않습니다.</p></div>
+      <div class="row"><span class="tag t-watch">감시</span><p><b>방산 잔여 포지션</b>휴전 협상이 번복되면 재무장 논지가 되살아납니다 — 절반을 남긴 이유이며, 협상 경과를 캘린더로 추적합니다.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">04 · 신입 부원 활동</div>
+    <h2>20기가 맡는 일</h2>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><p><b>보드 읽기 + 캘린더 담당</b>공개 보드에서 스토리·매매 근거를 읽고, 주간 캘린더의 지표·어닝 리딩/팔로잉을 나눠 맡아 회의에서 브리핑합니다.</p></div>
+      <div class="step"><span class="n">2</span><p><b>리서치 노트</b>관심 종목을 골라 논지·밸류에이션·리스크를 정리합니다. 정리한 요지는 보드 '오늘의 분석' 관심종목에 함께 표시됩니다.</p></div>
+      <div class="step"><span class="n">3</span><p><b>신규 스토리(알파 ③) 제안</b>테제 한 문장 + 표현할 종목 + 반증 조건을 갖춰 정기회의 안건으로 올립니다. 승인 시 집행하며, 성과는 보드에서 추적합니다.</p></div>
+    </div>
+    <p class="lede" style="margin:14px 0 0">배정 재원은 코어 축소·익절 대금으로 확보한 약 $70,000이며, 회의 승인 후 집행합니다.</p>
+  </section>
+
+  <footer>
+    성균관대학교 금융투자학회 GLIF 26-2 자산운용팀 · 모의운용이며 모든 수치는 2026. 9. 8 기준입니다 ·
+    실시간 현황은 <a href="https://gaa-dashboard-eight.vercel.app" target="_blank" rel="noreferrer">보드</a>에서,
+    매 판단의 근거는 매매 내역에서 확인할 수 있습니다.
+  </footer>
+</div>
