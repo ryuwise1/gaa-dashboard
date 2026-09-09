@@ -11,7 +11,8 @@
   --sunken: #f6f7f9;
   --ink: #17171c;
   --ink-2: #4e4e57;
-  --muted: #7c7c87;
+  /* 회색 보조 텍스트 — 흰 배경 대비 5.5:1 (이전 #7c7c87은 4.1:1로 소형 글자 기준 미달, 9/9 가독성 지적) */
+  --muted: #686872;
   --hairline: #eff0f2;
   --hairline-2: #e2e3e7;
   --chip-bg: #f2f3f5;
@@ -45,7 +46,7 @@
   --sunken: #212128;
   --ink: #f3f3f6;
   --ink-2: #c2c2cb;
-  --muted: #8d8d97;
+  --muted: #9a9aa5;
   --hairline: #2a2a32;
   --hairline-2: #35353f;
   --chip-bg: #2a2a32;
@@ -985,7 +986,7 @@ a { color: var(--accent); }
   :root, :root[data-theme="dark"] {
     color-scheme: light;
     --bg: #ffffff; --sunken: #f6f7f9; --ink: #17171c; --ink-2: #4e4e57;
-    --muted: #6c6c76; --hairline: #dddddd; --hairline-2: #cccccc;
+    --muted: #686872; --hairline: #dddddd; --hairline-2: #cccccc;
     --chip-bg: #f0f0f2; --chip-ink: #4e4e57; --logo-bg: #f0f0f2;
     --seg-on-bg: #ffffff; --seg-on-ink: #17171c;
   }
@@ -1107,7 +1108,7 @@ a { color: var(--accent); }
 .sig-chips i.bad { color: var(--loss); background: color-mix(in srgb, var(--loss) 10%, transparent); }
 /* 반입한 리서치 노트의 논지 한 줄 — 원문은 리포 research/{티커}.md */
 .sig-thesis {
-  margin: 3px 0 0; font-size: 10.5px; color: var(--muted); line-height: 1.5;
+  margin: 4px 0 0; font-size: 12px; color: var(--ink-2); line-height: 1.6; max-width: 68ch;
 }
 
 /* ── 팀 모드 로그인 — 풀스크린 게이트. 인증 전에는 보드 내용이 아예 렌더되지 않는다 ── */
@@ -1212,7 +1213,7 @@ a { color: var(--accent); }
 .story-thesis { margin: 12px 0 10px; font-size: 12.5px; line-height: 1.6; color: var(--ink-2); }
 .story-thesis b { font-weight: 800; color: var(--ink); }
 .story-roles { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.story-roles > li { display: flex; align-items: flex-start; gap: 8px; font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+.story-roles > li { display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--ink-2); line-height: 1.6; }
 .story-badge {
   flex: none; font-size: 10px; font-weight: 800; padding: 1.5px 7px; border-radius: 999px;
   background: var(--chip-bg); color: var(--chip-ink); min-width: 52px; text-align: center;
@@ -1268,13 +1269,31 @@ a { color: var(--accent); }
 .plan-about b { color: var(--ink); font-weight: 700; }
 .plan-about .sep { color: var(--muted); }
 /* 보유 현황 펼침 상단 — 무슨 회사인지 한 줄 */
-.hist-about { margin: 0 0 10px; font-size: 12px; line-height: 1.55; color: var(--muted); }
-.hist-about b { color: var(--ink-2); font-weight: 700; }
+.hist-about { margin: 0 0 12px; }
 .plan-why {
-  margin: -2px 0 8px; padding: 7px 10px 7px 34px;
-  font-size: 11.5px; line-height: 1.6; color: var(--muted);
+  margin: -2px 0 8px; padding: 10px 12px 11px 34px;
+  font-size: 13px; line-height: 1.7; color: var(--ink);
   background: var(--sunken); border-radius: 8px;
 }
+
+/* ── 종목 설명 블록 (WhyBlock) — 플랜·보유·AP·MP 펼침 공용 ──
+   본문은 본문색, 회색은 라벨에만. 줄 길이 68ch로 제한해 긴 근거도 눈이 줄을 잃지 않게 */
+.why { display: flex; flex-direction: column; gap: 8px; max-width: 68ch; }
+.why-ind {
+  align-self: flex-start; font-size: 11px; font-weight: 800; letter-spacing: 0.02em;
+  color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent);
+  padding: 2px 9px; border-radius: 999px;
+}
+.why p { margin: 0; font-size: 13px; line-height: 1.7; color: var(--ink); }
+.why-about { color: var(--ink-2); }
+.why-k { display: block; font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 1px; }
+.why.compact { gap: 5px; }
+.why.compact p { font-size: 12.5px; line-height: 1.6; }
+
+/* 요약 카드 — 운용 슬리브 수익률 (현금성 자산 제외) */
+.sum-active { margin: 4px 0 0; font-size: 12px; color: var(--ink-2); display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.sum-active b { font-weight: 800; font-size: 13px; }
+.sum-active .sub { font-size: 11px; color: var(--muted); }
 
 /* ── 보드 변경 로그 (팀 전용) — GitHub 커밋 창 ── */
 .chlog { margin: 18px 0 0; font-size: 11.5px; color: var(--muted); }

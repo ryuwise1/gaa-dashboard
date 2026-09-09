@@ -26,6 +26,7 @@ import ChangeLog from "@/components/ChangeLog";
 import StoryBlock from "@/components/StoryBlock";
 import ActionBar from "@/components/ActionBar";
 import Dividends from "@/components/Dividends";
+import WhyBlock from "@/components/WhyBlock";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
@@ -212,6 +213,14 @@ export default function Dashboard() {
 
   const rows = useMemo(() => buildHoldingRows(quotes), [quotes]);
   const totals = useMemo(() => buildTotals(rows, quotes), [rows, quotes]);
+  // 현금성 자산(VT·SGOV)을 뺀 운용 슬리브만의 원가 대비 수익률.
+  // 전체 수익률은 대기 자본 45%에 희석되므로, 종목 선택이 실제로 얼마를 냈는지는 이 숫자가 말한다.
+  const active = useMemo(() => {
+    const act = rows.filter((r) => r.sector !== "현금성 자산" && r.valueUsd != null && r.costUsd != null);
+    const value = act.reduce((s, r) => s + (r.valueUsd ?? 0), 0);
+    const cost = act.reduce((s, r) => s + (r.costUsd ?? 0), 0);
+    return { value, cost, pct: cost > 0 ? value / cost - 1 : 0 };
+  }, [rows]);
   const hasLive = rows.some((r) => r.live);
   // 환율이 아직 안 온 종목은 valueUsd가 null이라 합계·비중에서 통째로 빠진다.
   // 로딩 중 잠깐이지만 그동안 비중이 실제보다 부풀어 보이므로 그 사실을 드러낸다.
@@ -511,6 +520,12 @@ export default function Dashboard() {
               {fmtSignedUsd(totalPnl)}
               <span className="sub">({fmtPct(totalPct)})</span>
             </div>
+            {hasLive && active.cost > 0 && (
+              <p className="sum-active num" title="VT·SGOV(현금성 자산)를 뺀 운용 슬리브만의 원가 대비 수익률 — 전체 수익률이 대기 자본에 희석되기 전의 숫자">
+                운용 슬리브 <b className={deltaClass(active.pct)}>{fmtPct(active.pct)}</b>
+                <span className="sub">현금성 자산 제외 · 원가 {fmtUsd(active.cost, 0)}</span>
+              </p>
+            )}
             {/* 이름+수치는 한 덩어리로 — 줄이 바뀌어도 "S&P 500 / +4.6%"처럼 짝이 갈라지지 않게 */}
             {bench.length > 0 && hasLive && (
               <p className="bench num" title="7/30 운용 시작 직전 종가 대비 지수 등락">
@@ -772,10 +787,10 @@ export default function Dashboard() {
                               <div className="hist">
                                 {(() => {
                                   const pos = HOLDINGS.positions.find((p) => p.ticker === r.ticker);
-                                  return pos?.about ? (
-                                    <p className="hist-about">
-                                      {pos.industry && <b>{pos.industry} — </b>}{pos.about}
-                                    </p>
+                                  return pos && (pos.about || pos.industry) ? (
+                                    <div className="hist-about">
+                                      <WhyBlock industry={pos.industry} about={pos.about} compact />
+                                    </div>
                                   ) : null;
                                 })()}
                                 <RangeChart
@@ -914,14 +929,7 @@ export default function Dashboard() {
                         </div>
                         {whyOpen && p.why && (
                           <div className="plan-why">
-                            {(p.industry || p.about) && (
-                              <p className="plan-about">
-                                {p.industry && <b>{p.industry}</b>}
-                                {p.industry && p.about && <span className="sep"> — </span>}
-                                {p.about}
-                              </p>
-                            )}
-                            <p>{p.why}</p>
+                            <WhyBlock industry={p.industry} about={p.about} why={p.why} />
                           </div>
                         )}
                       </Fragment>

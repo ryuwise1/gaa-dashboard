@@ -29,7 +29,7 @@ const GROUPS: Group[] = [
         label: "AI 보안 — 위성", sectors: ["AI 보안"],
         bullets: [
           <>AI 도입의 다음 단계 지출 — 탐지 <b>CrowdStrike</b>, 복구 <b>Rubrik</b></>,
-          <>메인 알파의 <b>1/4 이하</b>로 크기를 제한하는 위성 슬리브 (현재 1차 절반 편입)</>,
+          <>메인 15% 대비 <b>1/3 크기(5%)</b>의 위성 슬리브 — 검증 전 테마는 작게 시작해 2차로 채운다 (현재 1차 절반 편입)</>,
           <>GPT-6 Astra의 사이버보안 <b>&lsquo;Critical&rsquo; 등급</b> 도달(9/3)이 촉매</>,
         ],
       },

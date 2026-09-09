@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Logo from "@/components/Logo";
+import WhyBlock from "@/components/WhyBlock";
 import {
   HOLDINGS, fmtPct, fmtUsd, fmtSignedMoney, sectorColorVar, tickerColorVar,
   type HoldingRow, type Unit,
@@ -242,11 +243,10 @@ export default function Allocation({
               <div className="alloc-detail-head">
                 <b>{a.name}</b>
                 {a.ticker && <span className="tk">{a.ticker}</span>}
-                {a.industry && <span className="alloc-ind">{a.industry}</span>}
               </div>
-              {a.about && <p className="alloc-about">{a.about}</p>}
-              {a.why && <p className="alloc-why">{a.why}</p>}
-              {!a.about && !a.why && <p className="alloc-about">등록된 설명이 없습니다.</p>}
+              {a.about || a.why || a.industry
+                ? <WhyBlock industry={a.industry} about={a.about} why={a.why} />
+                : <p className="alloc-about">등록된 설명이 없습니다.</p>}
             </div>
           )}
           </div>
