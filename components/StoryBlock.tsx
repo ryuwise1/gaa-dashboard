@@ -5,55 +5,79 @@ import { HOLDINGS } from "@/lib/portfolio";
 
 /**
  * 투자 스토리 — 이 포트폴리오가 무슨 베팅인지 첫 화면에서 읽히게 한다.
- * 기본은 접힘: 역할별 비중 스택 바 + 범례만으로 구조가 한눈에 보인다.
- * 펼치면 같은 차트 아래로 역할별 근거가 개조식으로 나온다.
- * 비중은 holdings.json의 목표 비중(MP)을 섹터→역할 매핑으로 집계한다.
+ * 역할을 네 묶음(알파 / 헤지 / 분산 / 현금성 자산)으로 묶고, 그 안을 슬리브로 나눈다.
+ * 4%짜리 위성 슬리브가 단독 행으로 떠서 구조가 기괴해 보이는 것을 막기 위한 2단 구조.
+ * 기본은 접힘: 묶음 4개의 스택 바 + 범례만. 펼치면 슬리브별 근거가 개조식으로 나온다.
+ * 비중은 holdings.json의 목표 비중(MP)을 섹터→슬리브 매핑으로 집계한다.
  */
 
-const ROLES: { key: string; color: string; sectors: string[]; bullets: ReactNode[] }[] = [
+interface Part { label: string; sectors: string[]; bullets: ReactNode[] }
+interface Group { key: string; color: string; parts: Part[] }
+
+const GROUPS: Group[] = [
   {
-    key: "메인 알파", color: "var(--s2)", sectors: ["AI CapEx"],
-    bullets: [
-      <>AI 데이터센터 투자 확대 → <b>메모리 공급 부족</b>이라는 판단</>,
-      <>공급 측 <b>삼성전자·SK하이닉스</b> / 수요 측 <b>MSFT·META</b>를 함께 편입</>,
+    key: "알파", color: "var(--s2)",
+    parts: [
+      {
+        label: "메모리 병목 — 메인", sectors: ["AI CapEx"],
+        bullets: [
+          <>AI 데이터센터 투자 확대 → <b>메모리 공급 부족</b>이라는 판단</>,
+          <>공급 측 <b>삼성전자·SK하이닉스</b> / 수요 측 <b>MSFT·META</b>, 파운드리 옵션 <b>INTC</b></>,
+        ],
+      },
+      {
+        label: "AI 보안 — 위성", sectors: ["AI 보안"],
+        bullets: [
+          <>AI 도입의 다음 단계 지출 — 탐지 <b>CrowdStrike</b>, 복구 <b>Rubrik</b></>,
+          <>메인 알파의 <b>1/4 이하</b>로 크기를 제한하는 위성 슬리브 (현재 1차 절반 편입)</>,
+          <>GPT-6 Astra의 사이버보안 <b>&lsquo;Critical&rsquo; 등급</b> 도달(9/3)이 촉매</>,
+        ],
+      },
     ],
   },
   {
-    key: "알파 ②", color: "var(--s9)", sectors: ["AI 보안"],
-    bullets: [
-      <>AI 도입의 다음 단계 지출인 <b>보안</b> — 탐지 층 <b>CrowdStrike</b>, 복구 층 <b>Rubrik</b></>,
-      <>GPT-6 Astra의 사이버보안 <b>&lsquo;Critical&rsquo; 등급</b> 도달(9/3)로 촉매 현실화 판단</>,
+    key: "헤지", color: "var(--s7)",
+    parts: [
+      {
+        label: "메모리 역상관", sectors: ["메모리 역상관"],
+        bullets: [<><b>메모리를 원가로 부담</b>하는 QCOM·AAPL·DELL·HPQ — 메모리 하락 국면의 방어</>],
+      },
+      {
+        label: "금리 바벨", sectors: ["금리 (인하)", "금리 (인상)"],
+        bullets: [<>장기 국채 <b>TLT·IEF</b> ↔ 은행 <b>JPM·BAC·XLF</b> 양방향 — 금리 방향 <b>중립화</b></>],
+      },
     ],
   },
   {
-    key: "헤지 ①", color: "var(--s7)", sectors: ["메모리 역상관"],
-    bullets: [
-      <><b>메모리를 원가로 부담</b>하는 기업 (<b>QCOM·AAPL·DELL·HPQ</b>)</>,
-      <>메모리 가격 하락 국면에서 포트폴리오를 방어</>,
+    key: "분산", color: "var(--s3)",
+    parts: [
+      {
+        label: "에너지", sectors: ["에너지"],
+        bullets: [<>메이저 4종 <b>XOM·CVX·SHEL·TTE</b> — 지정학·유가 상방 대비, 배당</>],
+      },
+      {
+        label: "유럽 방산", sectors: ["유럽 방산"],
+        bullets: [<><b>EUAD</b> — 휴전 협상 국면에서 절반 축소, 잔여는 협상 번복 대비 옵션</>],
+      },
     ],
   },
   {
-    key: "헤지 ②", color: "var(--s5)", sectors: ["금리 (인하)", "금리 (인상)"],
-    bullets: [
-      <>장기 국채 <b>TLT·IEF</b> ↔ 은행 <b>JPM·BAC·XLF</b> 양방향 보유</>,
-      <>금리 방향과 무관하게 영향을 <b>중립화</b></>,
-    ],
-  },
-  {
-    key: "분산", color: "var(--s3)", sectors: ["에너지", "유럽 방산"],
-    bullets: [
-      <><b>에너지 메이저 4종</b> + 유럽 방산 <b>EUAD</b> — 주력 테마와 상관 낮은 자산군</>,
-      <>방산은 휴전 협상 진전으로 <b>목표 절반 축소</b>, AI 보안으로 로테이션 중</>,
-    ],
-  },
-  {
-    key: "코어·현금", color: "var(--s1)", sectors: ["코어 인덱스", "현금"],
-    bullets: [
-      <>월드 인덱스 <b>VT</b> + 초단기 국채 <b>SGOV</b> (배당 자동 재투자 대상)</>,
-      <><b>차기 기수</b> 합류 이후의 본격 운용을 위해 남겨 둔 재원</>,
+    key: "현금성 자산", color: "var(--s1)",
+    parts: [
+      {
+        label: "VT · SGOV", sectors: ["현금성 자산"],
+        bullets: [
+          <>월드 인덱스 <b>VT</b> + 초단기 국채 <b>SGOV</b> (배당 자동 재투자 대상)</>,
+          <><b>20기 신규 스토리(알파 ③)</b>에 배정할 재원 — 견해 없는 대기 자본</>,
+        ],
+      },
     ],
   },
 ];
+
+const weightOf = (sectors: string[]) =>
+  HOLDINGS.positions.filter((p) => sectors.includes(p.sector)).reduce((s, p) => s + p.targetWeight, 0);
+const fmt = (w: number) => (w * 100).toFixed(2).replace(/\.?0+$/, "");
 
 export default function StoryBlock() {
   // 기본은 접힘 — 펼친 상태는 브라우저에 기억된다
@@ -67,12 +91,10 @@ export default function StoryBlock() {
     try { localStorage.setItem("gaa-story", next ? "on" : "off"); } catch {}
   };
 
-  const weightOf = (sectors: string[]) =>
-    HOLDINGS.positions
-      .filter((p) => sectors.includes(p.sector))
-      .reduce((s, p) => s + p.targetWeight, 0);
-  const pct = (sectors: string[]) =>
-    (weightOf(sectors) * 100).toFixed(1).replace(/\.0$/, "");
+  const groups = GROUPS.map((g) => {
+    const parts = g.parts.map((p) => ({ ...p, w: weightOf(p.sectors) }));
+    return { ...g, parts, w: parts.reduce((s, p) => s + p.w, 0) };
+  });
 
   return (
     <div className="story" data-collapsed={!open || undefined}>
@@ -84,17 +106,29 @@ export default function StoryBlock() {
         </button>
       </div>
 
-      {/* 역할별 목표 비중 — 접혀 있어도 항상 보이는 구조 요약 */}
+      {/* 묶음 4개의 스택 바 — 같은 묶음 안의 슬리브는 같은 색의 농담으로 나눈다 */}
       <div className="story-bar" role="img" aria-label="역할별 목표 비중">
-        {ROLES.map((r) => (
-          <i key={r.key} style={{ width: `${weightOf(r.sectors) * 100}%`, background: r.color }} title={`${r.key} ${pct(r.sectors)}%`} />
-        ))}
+        {groups.map((g) =>
+          g.parts.map((p, i) => (
+            <i
+              key={g.key + p.label}
+              style={{
+                width: `${p.w * 100}%`,
+                background: i === 0 ? g.color : `color-mix(in srgb, ${g.color} 55%, var(--bg))`,
+              }}
+              title={`${g.key} · ${p.label} ${fmt(p.w)}%`}
+            />
+          ))
+        )}
       </div>
       <div className="story-legend">
-        {ROLES.map((r) => (
-          <span key={r.key} className="story-leg">
-            <i style={{ background: r.color }} />
-            {r.key} <b className="num">{pct(r.sectors)}%</b>
+        {groups.map((g) => (
+          <span key={g.key} className="story-leg">
+            <i style={{ background: g.color }} />
+            {g.key} <b className="num">{fmt(g.w)}%</b>
+            {g.parts.length > 1 && (
+              <em className="num">({g.parts.map((p) => fmt(p.w)).join(" + ")})</em>
+            )}
           </span>
         ))}
       </div>
@@ -102,18 +136,29 @@ export default function StoryBlock() {
       {open && (
         <>
           <p className="story-thesis">
-            핵심 논지는 AI 투자 사이클의 <b>메모리 병목</b>이며, 그 후행 수혜로 <b>AI 보안</b>을 확장 편입했습니다.
+            핵심 논지는 AI 투자 사이클의 <b>메모리 병목</b>이며, 그 후행 수혜인 <b>AI 보안</b>을 위성 알파로 두었습니다.
+            헤지는 알파가 틀리는 국면에 대비하고, 분산은 상관이 낮은 자산군이며, 현금성 자산은 차기 기수의 신규 스토리에 배정할 재원입니다.
           </p>
           <ul className="story-roles">
-            {ROLES.map((r) => (
-              <li key={r.key}>
-                <span className="story-badge" style={{ background: `color-mix(in srgb, ${r.color} 16%, transparent)`, color: r.color }}>
-                  {r.key}
+            {groups.map((g) => (
+              <li key={g.key}>
+                <span className="story-badge" style={{ background: `color-mix(in srgb, ${g.color} 16%, transparent)`, color: g.color }}>
+                  {g.key}
                 </span>
-                <b className="num">{pct(r.sectors)}%</b>
-                <ul className="story-bullets">
-                  {r.bullets.map((b, i) => <li key={i}>{b}</li>)}
-                </ul>
+                <b className="num">{fmt(g.w)}%</b>
+                <div className="story-parts">
+                  {g.parts.map((p) => (
+                    <div key={p.label} className="story-part">
+                      <div className="story-part-head">
+                        <span>{p.label}</span>
+                        <b className="num">{fmt(p.w)}%</b>
+                      </div>
+                      <ul className="story-bullets">
+                        {p.bullets.map((b, i) => <li key={i}>{b}</li>)}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </li>
             ))}
           </ul>

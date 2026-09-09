@@ -52,14 +52,20 @@ export default function Logo({
   name,
   color,
   size = 30,
+  any = false,
 }: {
   ticker: string;
   name: string;
   color: string;
   size?: number;
+  /**
+   * 화이트리스트 밖의 티커도 CDN을 시도한다 — 캘린더 어닝처럼 미국 상장 티커만 들어오는 자리용.
+   * 알파벳만으로 된 티커로 제한해 BA.L 같은 해외 오매칭을 피한다. 실패하면 모노그램.
+   */
+  any?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
-  const code = CDN[ticker];
+  const code = CDN[ticker] ?? (any && /^[A-Z]{1,5}$/.test(ticker) ? ticker : undefined);
   const label = MONO[ticker] ?? ticker.replace(/\..*$/, "").slice(0, 3);
 
   if (!code || failed) {

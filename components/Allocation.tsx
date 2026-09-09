@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Logo from "@/components/Logo";
 import {
   HOLDINGS, fmtPct, fmtUsd, fmtSignedMoney, sectorColorVar, tickerColorVar,
@@ -21,6 +22,11 @@ export interface AllocRow {
   ticker: string | null;
   name: string;
   sector: string;
+  currency: string;
+  /** 행을 펼쳤을 때 보이는 정체·근거 (holdings.json) */
+  industry?: string;
+  about?: string;
+  why?: string;
   mp: number;            // 목표 비중
   ap: number;            // 현재 평가 비중
   gap: number;           // ap − mp
@@ -65,6 +71,8 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
         ticker: p.ticker,
         name: p.name,
         sector: p.sector,
+        currency: p.currency,
+        industry: p.industry, about: p.about, why: p.why,
         mp, ap, gap: ap - mp, cause,
         shortfallUsd: cause === "미집행" || cause === "집행 부족" ? shortfall : 0,
         excessUsd: cause === "축소 미집행" ? excess : 0,
@@ -82,7 +90,8 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
       key: "__cash__",
       ticker: null,
       name: "미집행 현금",
-      sector: "현금",
+      sector: "현금성 자산",
+      currency: "USD",
       mp: 0, ap, gap: ap, cause: "미집행",
       shortfallUsd: cashUsd,
       excessUsd: 0,
@@ -91,7 +100,8 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
     });
   }
 
-  out.sort((a, b) => Math.abs(b.gap) - Math.abs(a.gap));
+  // 목표 비중이 큰 순서 — 미집행 현금(MP 0)은 자연히 맨 아래. 같은 비중끼리는 괴리 큰 순.
+  out.sort((a, b) => (b.mp - a.mp) || (Math.abs(b.gap) - Math.abs(a.gap)));
   return { rows: out, nav, pnlTotal, cash: cashUsd };
 }
 
@@ -111,6 +121,8 @@ export default function Allocation({
   usdkrw: number | null;
 }) {
   const { rows: alloc, nav, pnlTotal, cash } = buildAllocRows(rows);
+  // 행을 누르면 풀네임·정체·편입 근거가 펼쳐진다 (해외 종목은 기본이 티커라 이름을 여기서 본다)
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const offBand = alloc.filter((a) => a.outOfBand).length;
   // 미체결 목표와 현금은 절대 더하지 않는다 — 현금은 그 목표를 채울 재원이라
   // 합치면 "가진 돈보다 많이 사야 한다"는 뜻이 돼버린다.
@@ -153,8 +165,24 @@ export default function Allocation({
 
       {alloc.map((a) => {
         const half = (Math.abs(a.gap) / maxGap) * 50;
+        const isOpen = openKey === a.key;
+        const canOpen = a.ticker != null;
+        // 해외 종목은 티커가 이름보다 짧고 익숙하다 — 국내 종목만 한글명
+        const label = !a.ticker || a.currency === "KRW" ? a.name : a.ticker;
         return (
-          <div key={a.key} className="alloc-row" data-cash={a.ticker == null || undefined}>
+          <div key={a.key} className="alloc-item" data-open={isOpen || undefined}>
+          <div
+            className="alloc-row"
+            data-cash={a.ticker == null || undefined}
+            data-clickable={canOpen || undefined}
+            role={canOpen ? "button" : undefined}
+            tabIndex={canOpen ? 0 : undefined}
+            aria-expanded={canOpen ? isOpen : undefined}
+            onClick={() => canOpen && setOpenKey(isOpen ? null : a.key)}
+            onKeyDown={(e) => {
+              if (canOpen && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setOpenKey(isOpen ? null : a.key); }
+            }}
+          >
             <span className="nm">
               {a.ticker ? (
                 <Logo
@@ -166,8 +194,9 @@ export default function Allocation({
               ) : (
                 <i className="alloc-dot" style={{ background: sectorColorVar(a.sector) }} />
               )}
-              <span className="alloc-nm">{a.name}</span>
+              <span className="alloc-nm">{label}</span>
               <span className={`alloc-cause ${causeClass(a.cause)}`}>{a.cause}</span>
+              {canOpen && <i className="alloc-caret" aria-hidden>▾</i>}
             </span>
 
             <span className="num alloc-mp">{a.mp > 0 ? (a.mp * 100).toFixed(1) + "%" : "—"}</span>
@@ -207,6 +236,19 @@ export default function Allocation({
                 "—"
               )}
             </span>
+          </div>
+          {isOpen && (
+            <div className="alloc-detail">
+              <div className="alloc-detail-head">
+                <b>{a.name}</b>
+                {a.ticker && <span className="tk">{a.ticker}</span>}
+                {a.industry && <span className="alloc-ind">{a.industry}</span>}
+              </div>
+              {a.about && <p className="alloc-about">{a.about}</p>}
+              {a.why && <p className="alloc-why">{a.why}</p>}
+              {!a.about && !a.why && <p className="alloc-about">등록된 설명이 없습니다.</p>}
+            </div>
+          )}
           </div>
         );
       })}

@@ -1,8 +1,28 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { HOLDINGS } from "@/lib/portfolio";
+import Logo from "@/components/Logo";
+import { HOLDINGS, tickerColorVar } from "@/lib/portfolio";
 import { MEETINGS, OPENING_DATE, TRADES, type Trade } from "@/lib/trades";
+
+/* ── 국기 — 국가명 텍스트 대신. Windows 크롬은 국기 이모지를 "KR" 글자로 그리므로 이미지로 ── */
+const FLAG: Record<string, string> = { 미국: "us", 유로존: "eu", 영국: "gb", 일본: "jp", 중국: "cn", 한국: "kr" };
+function Flag({ country, size = 16 }: { country: string; size?: number }) {
+  const code = FLAG[country];
+  if (!code) return <span className="cal-flag">{country}</span>;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className="cal-flagimg"
+      src={`https://flagcdn.com/w40/${code}.png`}
+      style={{ width: size }}
+      alt={country}
+      title={country}
+      loading="lazy"
+      decoding="async"
+    />
+  );
+}
 
 /* ── 우리 활동 오버레이 — 시장 일정 위에 우리의 회의·매매를 겹쳐 복기가 되게 한다 ── */
 const TICKER_NAME = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
@@ -118,7 +138,7 @@ function MacroItem({ m }: { m: MacroEvent }) {
   return (
     <div className="cal-item" data-impact={m.impact} title={m.desc ?? undefined}>
       <span className="cal-time num">{kstTime(m.time)}</span>
-      <span className="cal-flag">{m.country}</span>
+      <Flag country={m.country} />
       <span className="cal-title">
         {m.ko ?? m.title}
         <span className="cal-est num">
@@ -138,10 +158,12 @@ function MacroItem({ m }: { m: MacroEvent }) {
   );
 }
 
-function EarnItem({ e }: { e: EarningsEvent }) {
+function EarnItem({ e, logo = false }: { e: EarningsEvent; logo?: boolean }) {
   return (
     <div className="cal-item" data-held={e.held}>
       <span className="cal-when">{e.when || "—"}</span>
+      {/* 로고는 상세(월간 클릭) 화면에서만 — 목록 자체에는 넣지 않는다 */}
+      {logo && <Logo ticker={e.symbol} name={e.name} color={tickerColorVar(e.symbol, 0)} size={22} any />}
       <span className="cal-title">
         <b className="num">{e.symbol}</b> {e.name}
         <span className={`cal-tag${e.held ? " held" : ""}`}>{e.tag}</span>
@@ -389,7 +411,7 @@ export default function Calendar({ team = false }: { team?: boolean }) {
                             {cell.d?.macro.slice(0, 3).map((m, k) => (
                               <div key={"m" + k} className="g-ev macro" data-impact={m.impact}
                                 title={`${kstTime(m.time)} ${m.country} · ${m.ko ?? m.title}${m.actual ? ` — 실제 ${m.actual}${m.verdict ? ` (예상 ${m.verdict})` : ""}` : ""}${m.desc ? ` — ${m.desc}` : ""}`}>
-                                {m.country === "한국" ? "🇰🇷 " : ""}{m.ko ?? m.title}
+                                <Flag country={m.country} size={12} /> {m.ko ?? m.title}
                               </div>
                             ))}
                             {cell.d?.earnings.slice(0, 3).map((e) => (
@@ -451,7 +473,7 @@ export default function Calendar({ team = false }: { team?: boolean }) {
                     <div className="cal-col">
                       <div className="cal-col-head">어닝</div>
                       {d.earnings.length === 0 && <div className="cal-none">—</div>}
-                      {d.earnings.map((e) => <EarnItem key={e.symbol} e={e} />)}
+                      {d.earnings.map((e) => <EarnItem key={e.symbol} e={e} logo />)}
                     </div>
                   </div>
                 )}

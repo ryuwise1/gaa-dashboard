@@ -468,7 +468,8 @@ a { color: var(--accent); }
   padding: 14px 6px; border: 0; background: none; cursor: pointer;
   text-align: left; border-radius: 14px;
 }
-.hold + .hold { box-shadow: inset 0 1px 0 var(--hairline); }
+/* 행 구분선 — .hold는 각자 <li> 안에 있어 형제 결합자로는 절대 안 잡힌다 (9/9 감사에서 발견) */
+.hold-list > li + li > .hold { box-shadow: inset 0 1px 0 var(--hairline); }
 .hold:hover { background: var(--sunken); box-shadow: none; }
 .hold[data-open="true"] { background: var(--sunken); box-shadow: none; }
 
@@ -499,8 +500,9 @@ a { color: var(--accent); }
   min-width: 0; margin-top: 1px;
 }
 .hold-sub > .num { white-space: nowrap; flex: none; }
-.hold-sub > .sec-chip { min-width: 0; overflow: hidden; }
-.hold-sub > .sec-chip { text-overflow: ellipsis; white-space: nowrap; display: inline-flex; }
+/* 섹터 칩은 좁아지면 글자만 말줄임 — flex 컨테이너라 텍스트를 별도 span(.t)에 담아야 ellipsis가 걸린다 */
+.hold-sub > .sec-chip { flex: 0 1 auto; min-width: 0; }
+.sec-chip .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .sec-chip {
   display: inline-flex; align-items: center; gap: 4px;
@@ -761,8 +763,11 @@ a { color: var(--accent); }
   .sum-total { font-size: 30px; }
   .macro { gap: 12px; }
   .hold-main { font-size: 15px; }
-  .plan-row { grid-template-columns: minmax(0, 1fr) 60px 108px; }
+  /* 자식은 이름·알약·진행(%)·목표 4개 — 열도 4개여야 목표 금액이 다음 줄로 떨어지지 않는다 */
+  .plan-row { grid-template-columns: minmax(0, 1fr) 58px 34px 96px; }
   .plan-row .bar { display: none; }
+  .bar-wrap { justify-content: flex-end; }
+  .bar-pct { min-width: 0; }
   .hist-fx .rr { margin-left: 0; width: 100%; }
   .hist-item { grid-template-columns: 36px 54px auto 1fr; }
   .hist-item .hu { display: none; }
@@ -804,6 +809,10 @@ a { color: var(--accent); }
   background: var(--chip-bg); padding: 1px 6px; border-radius: 5px;
 }
 .cal-item[data-impact="High"] .cal-flag { color: var(--gain); background: var(--gain-bg); }
+/* 국기 이미지 — 텍스트 국가명 대신. 3:2 비율, 얇은 테두리로 밝은 국기(일본)도 배경에서 분리 */
+.cal-flagimg { flex: none; height: auto; border-radius: 2px; box-shadow: 0 0 0 1px var(--hairline); align-self: center; }
+.g-ev .cal-flagimg { display: inline-block; vertical-align: -1px; margin-right: 1px; }
+.cal-item .logo { flex: none; align-self: center; border-radius: 6px; }
 .cal-when { flex: none; font-size: 10.5px; font-weight: 600; color: var(--muted); width: 26px; }
 .cal-title { min-width: 0; line-height: 1.5; }
 .cal-title b { font-weight: 700; }
@@ -914,17 +923,26 @@ a { color: var(--accent); }
 .mtg-sum { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
 .mtg-sum .hitrate { color: var(--ink-2); font-weight: 600; }
 .mtg-caret { color: var(--muted); font-size: 11px; }
-.mtg-body { padding: 2px 10px 18px 60px; }
-.mtg-context { font-size: 12.5px; line-height: 1.7; color: var(--ink-2); margin: 0 0 10px; }
-.mtg-agenda { margin-bottom: 10px; }
+.mtg-body { padding: 6px 10px 20px 60px; }
+/* 산문 블록은 한 줄 55자 안팎으로 측정폭을 제한한다 — 914px 폭에 12.5px 글자면 70자가 넘어 눈이 줄을 잃는다 */
+.mtg-prose { max-width: 680px; }
+.mtg-context { font-size: 13px; line-height: 1.75; color: var(--ink-2); margin: 0; }
+.mtg-agenda { margin-bottom: 16px; }
 .mtg-agenda .h {
-  font-size: 10.5px; font-weight: 700; color: var(--muted);
-  letter-spacing: 0.05em; margin-bottom: 4px;
+  font-size: 11px; font-weight: 800; color: var(--accent);
+  letter-spacing: 0.06em; margin-bottom: 6px;
 }
 .mtg-agenda ul { margin: 0; padding-left: 16px; }
-.mtg-agenda li, .mtg-agenda p { font-size: 12.5px; line-height: 1.7; color: var(--ink); margin: 0; }
+.mtg-agenda li, .mtg-agenda p { font-size: 13px; line-height: 1.75; color: var(--ink); margin: 0; }
+.mtg-agenda li + li { margin-top: 7px; }
+/* 원형 숫자(①②…)로 시작하는 항목은 불릿을 끄고 숫자를 내어쓴다 */
+.mtg-list li[data-marked] { list-style: none; margin-left: -16px; padding-left: 1.6em; text-indent: -1.6em; }
+.mtg-lead { margin: 0 0 6px !important; color: var(--ink-2); }
 .mtg-perf { list-style: none; padding: 0 !important; }
-.mtg-perf li { padding: 2px 0; }
+.mtg-perf li { display: flex; align-items: center; gap: 9px; padding: 4px 0; }
+.mtg-perf li + li { margin-top: 0; }
+.mtg-perf .logo { flex: none; border-radius: 6px; }
+.mtg-perf-txt { min-width: 0; }
 .mtg-perf b { font-weight: 600; }
 .mtg-perf i { font-style: normal; font-weight: 700; }
 @media (max-width: 620px) {
@@ -1177,6 +1195,12 @@ a { color: var(--accent); }
 .story-leg { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); white-space: nowrap; }
 .story-leg i { width: 8px; height: 8px; border-radius: 2.5px; flex: none; }
 .story-leg b { color: var(--ink-2); font-weight: 700; }
+.story-leg em { font-style: normal; font-size: 10.5px; opacity: 0.8; }
+
+/* 펼침 — 묶음 > 슬리브 2단 */
+.story-parts { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.story-part-head { display: flex; align-items: baseline; gap: 8px; font-size: 12px; color: var(--ink-2); font-weight: 700; margin-bottom: 2px; }
+.story-part-head b { font-weight: 700; color: var(--muted); font-size: 11px; }
 
 /* 펼침 — 역할별 근거 개조식 */
 .story-bullets { list-style: none; margin: 0; padding: 0; min-width: 0; flex: 1; }
@@ -1238,6 +1262,14 @@ a { color: var(--accent); }
 .plan-row[data-clickable]:hover .plan-nm { text-decoration: underline; text-underline-offset: 2px; }
 .plan-caret { font-style: normal; font-size: 9px; color: var(--muted); opacity: 0.7; transition: transform 0.15s; }
 .plan-row[data-open] .plan-caret { transform: rotate(180deg); }
+.plan-why p { margin: 0; }
+.plan-why p + p { margin-top: 6px; }
+.plan-about { color: var(--ink-2); }
+.plan-about b { color: var(--ink); font-weight: 700; }
+.plan-about .sep { color: var(--muted); }
+/* 보유 현황 펼침 상단 — 무슨 회사인지 한 줄 */
+.hist-about { margin: 0 0 10px; font-size: 12px; line-height: 1.55; color: var(--muted); }
+.hist-about b { color: var(--ink-2); font-weight: 700; }
 .plan-why {
   margin: -2px 0 8px; padding: 7px 10px 7px 34px;
   font-size: 11.5px; line-height: 1.6; color: var(--muted);
@@ -1356,9 +1388,10 @@ a { color: var(--accent); }
   color: var(--muted);
   letter-spacing: 0.02em;
 }
-.alloc-head span:nth-child(2),
-.alloc-head span:nth-child(3),
-.alloc-head span:last-child { text-align: right; }
+/* 헤더 첫 열은 본문 이름 시작점(로고 22px + 간격 7px)에 맞춰 들여쓰고, 나머지 열은 전부 우측 정렬 —
+   본문의 숫자·막대 끝과 같은 선에 서게 (괴리 셀은 아래에서 그리드로 바꿔 숫자 위치를 고정) */
+.alloc-head span:first-child { padding-left: 29px; }
+.alloc-head span:not(:first-child) { text-align: right; }
 
 .alloc-row {
   padding: 9px 0;
@@ -1387,11 +1420,27 @@ a { color: var(--accent); }
 .alloc-cause.trim  { background: color-mix(in srgb, var(--s4) 18%, transparent); color: var(--s4); }
 .alloc-cause.drift { background: var(--chip-bg); color: var(--chip-ink); }
 .alloc-cause.ok    { background: var(--status-done-bg); color: var(--status-done); }
+.alloc-caret { font-style: normal; font-size: 9px; color: var(--muted); opacity: 0.7; transition: transform 0.15s; flex: none; }
+.alloc-row[data-clickable] { cursor: pointer; }
+.alloc-row[data-clickable]:hover .alloc-nm { text-decoration: underline; text-underline-offset: 2px; }
+.alloc-item[data-open] .alloc-caret { transform: rotate(180deg); }
+/* 행을 펼치면 풀네임·정체·편입 근거 — 해외 종목은 기본이 티커라 이름을 여기서 본다 */
+.alloc-detail {
+  padding: 8px 12px 12px 41px; border-bottom: 1px solid var(--hairline);
+  background: var(--sunken); font-size: 12px; line-height: 1.6;
+}
+.alloc-detail-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+.alloc-detail-head b { font-size: 13px; font-weight: 700; }
+.alloc-detail-head .tk { font-size: 11px; color: var(--muted); font-family: var(--mono, ui-monospace, monospace); }
+.alloc-ind { font-size: 10.5px; font-weight: 700; color: var(--chip-ink); background: var(--chip-bg); padding: 1px 7px; border-radius: 999px; }
+.alloc-about { margin: 0; color: var(--ink-2); }
+.alloc-why { margin: 6px 0 0; color: var(--muted); }
 
 .alloc-mp { color: var(--muted); text-align: right; }
 .alloc-ap { font-weight: 700; text-align: right; }
 
-.alloc-gap { display: flex; align-items: center; gap: 8px; min-width: 0; }
+/* 괴리 셀: 막대 | 숫자 2열 그리드 — 잔여/초과 문구가 막대 폭을 뺏지 않아 숫자 오른쪽 끝이 모든 행에서 같다 */
+.alloc-gap { display: grid; grid-template-columns: minmax(0, 1fr) 54px; column-gap: 8px; align-items: center; min-width: 0; }
 .alloc-bar {
   position: relative;
   flex: 1;
@@ -1418,10 +1467,10 @@ a { color: var(--accent); }
 }
 .alloc-bar i[data-dir="over"]  { background: var(--s3); }
 .alloc-bar i[data-dir="under"] { background: var(--s2); }
-.alloc-gapn { flex: none; font-size: 11px; font-weight: 700; min-width: 50px; text-align: right; }
+.alloc-gapn { font-size: 11px; font-weight: 700; min-width: 0; text-align: right; }
 .alloc-gapn.over  { color: var(--s3); }
 .alloc-gapn.under { color: var(--s2); }
-.alloc-short { flex: none; font-size: 10.5px; color: var(--muted); }
+.alloc-short { grid-column: 1 / -1; justify-self: end; font-size: 10.5px; color: var(--muted); line-height: 1.3; }
 .alloc-short.trim { color: var(--s4); font-weight: 700; }
 
 .alloc-share { text-align: right; line-height: 1.35; }
@@ -1445,8 +1494,10 @@ a { color: var(--accent); }
     font-size: 12px;
   }
   .alloc-bar, .alloc-short { display: none; }
-  .alloc-gap { justify-content: flex-end; }
+  .alloc-gap { grid-template-columns: minmax(0, 1fr); }
   .alloc-gapn { min-width: 0; font-size: 10.5px; }
+  .alloc-head span:first-child { padding-left: 0; }   /* 아래에서 로고를 숨기므로 */
+  .alloc-detail { padding-left: 12px; }
   .alloc-share b { font-size: 11px; }
   .alloc-pnl { display: none; }
   /* 로고를 접어 원인 알약 자리를 확보한다 — 괴리의 원인이 이 표의 핵심이라 */

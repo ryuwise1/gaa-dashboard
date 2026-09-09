@@ -16,6 +16,10 @@ export interface Position {
   avgPrice?: number;
   /** 이 종목을 왜 담는가 — 플랜 탭에서 행을 누르면 보이는 매수 근거 */
   why?: string;
+  /** 어느 나라·어떤 산업군인지 아주 짧게 (예: "미국 · 클라우드·SW") */
+  industry?: string;
+  /** 처음 보는 사람용 한 줄 정체 설명 — 투자 근거가 아니라 무엇을 하는 회사/ETF인지 */
+  about?: string;
 }
 
 export interface Quote {
@@ -205,9 +209,10 @@ export function tickerColorVar(ticker: string, fallbackIndex: number): string {
   return `var(--${SERIES[slot % 8]})`;
 }
 
+// 순서 = 플랜·도넛의 섹터 표시 순서. VT·SGOV는 견해 없는 대기 자본이라 "현금성 자산"으로 묶는다 (9/9).
 const SECTOR_SLOT: Record<string, number> = {
-  "코어 인덱스": 0, "AI CapEx": 1, "AI 보안": 8, "메모리 역상관": 2, "에너지": 3,
-  "유럽 방산": 4, "금리 (인하)": 5, "금리 (인상)": 6, "현금": 7,
+  "AI CapEx": 1, "AI 보안": 8, "메모리 역상관": 2, "에너지": 3,
+  "유럽 방산": 4, "금리 (인하)": 5, "금리 (인상)": 6, "현금성 자산": 0,
 };
 
 export function sectorColorVar(sector: string): string {

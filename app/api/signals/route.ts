@@ -177,7 +177,7 @@ export async function GET() {
 
   // 현금성(SGOV 등)은 추세 시그널이 무의미해서 제외
   const positions = HOLDINGS.positions.filter(
-    (p) => (p.targetUsd > 0 || (p.qty ?? 0) > 0) && p.sector !== "현금"
+    (p) => (p.targetUsd > 0 || (p.qty ?? 0) > 0) && p.ticker !== "SGOV"
   );
   const MACRO = ["^GSPC", "^KS11", "^VIX", "^TNX", "KRW=X"];
   const symbols = [...positions.map((p) => p.yahoo), ...WATCH.map((w) => w.ticker), ...MACRO];

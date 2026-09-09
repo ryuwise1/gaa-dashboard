@@ -63,7 +63,8 @@ export default function Dashboard() {
   const [hovered, setHovered] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("보유 현황");
-  const [unit, setUnit] = useState<Unit>("KRW");
+  // 기본 표시 통화는 달러 (9/9 변경). 현재가/평가금은 들어올 때 항상 평가금.
+  const [unit, setUnit] = useState<Unit>("USD");
   const [figure, setFigure] = useState<Figure>("평가금");
   const [sort, setSort] = useState<Sort>("평가금액");
   const [bench, setBench] = useState<BenchRow[]>([]);
@@ -107,10 +108,10 @@ export default function Dashboard() {
   useEffect(() => {
     const saved = localStorage.getItem("gaa-theme");
     setTheme(saved === "dark" ? "dark" : "light");
-    const u = localStorage.getItem("gaa-unit");
-    if (u === "USD") setUnit("USD");
-    const fg = localStorage.getItem("gaa-figure");
-    if (fg === "현재가") setFigure("현재가");
+    // 새 키(gaa-unit2)만 읽는다 — 예전 키에 남은 원화 선호가 새 기본값(달러)을 덮지 않게.
+    // 현재가/평가금 토글은 저장하지 않는다 — 세션 안에서만 유지.
+    const u = localStorage.getItem("gaa-unit2");
+    if (u === "KRW") setUnit("KRW");
     // 탭 복원 — URL의 ?tab=슬러그가 최우선(공유 링크), 없으면 마지막에 보던 탭.
     // 팀 전용 탭은 팀 모드일 때만 살린다. "보유 비중"은 모바일 전용이라 복원하지 않는다.
     // 비밀번호 게이트 도입 후로는 인증된 브라우저(localStorage)만 팀으로 본다
@@ -121,8 +122,8 @@ export default function Dashboard() {
     const want = fromUrl ?? (Object.values(TAB_SLUGS).includes(savedTab as Tab) ? (savedTab as Tab) : undefined);
     if (want && (team || !TEAM_ONLY_TABS.includes(want))) setTab(want);
   }, []);
-  const pickUnit = (u: Unit) => { setUnit(u); localStorage.setItem("gaa-unit", u); };
-  const pickFigure = (fg: Figure) => { setFigure(fg); localStorage.setItem("gaa-figure", fg); };
+  const pickUnit = (u: Unit) => { setUnit(u); localStorage.setItem("gaa-unit2", u); };
+  const pickFigure = (fg: Figure) => setFigure(fg);
   const pickTab = (t: Tab) => {
     setTab(t);
     localStorage.setItem("gaa-tab", t);
@@ -279,9 +280,11 @@ export default function Dashboard() {
   const planBySector = useMemo(() => {
     const costBy = new Map<string, number>();
     for (const r of rows) costBy.set(r.ticker, r.costUsd ?? 0);
-    return SECTOR_ORDER.map((sector) => {
+    const groups = SECTOR_ORDER.map((sector) => {
       // 목표 0 = 플랜에서 제외된 종목(교체·정리된 자리). 진행바에 0%로 남기지 않는다.
-      const positions = HOLDINGS.positions.filter((p) => p.sector === sector && p.targetUsd > 0);
+      const positions = HOLDINGS.positions
+        .filter((p) => p.sector === sector && p.targetUsd > 0)
+        .sort((a, b) => b.targetUsd - a.targetUsd);
       if (positions.length === 0) return null;
       return {
         sector,
@@ -290,6 +293,8 @@ export default function Dashboard() {
         boughtSum: positions.reduce((s, p) => s + (costBy.get(p.ticker) ?? 0), 0),
       };
     }).filter(Boolean) as { sector: string; positions: typeof HOLDINGS.positions; targetSum: number; boughtSum: number }[];
+    // 목표 비중이 큰 섹터부터 — 읽는 순서가 곧 중요도가 되게
+    return groups.sort((a, b) => b.targetSum - a.targetSum);
   }, [rows]);
 
   const deployedPct = Math.min(investedUsd / AUM_USD, 1);
@@ -720,7 +725,7 @@ export default function Dashboard() {
                                   </span>
                                   <span className="sec-chip">
                                     <i style={{ background: sectorColorVar(r.sector) }} />
-                                    {r.sector}
+                                    <span className="t">{r.sector}</span>
                                   </span>
                                 </span>
                               </span>
@@ -765,6 +770,14 @@ export default function Dashboard() {
                           {isOpen && (
                             <li>
                               <div className="hist">
+                                {(() => {
+                                  const pos = HOLDINGS.positions.find((p) => p.ticker === r.ticker);
+                                  return pos?.about ? (
+                                    <p className="hist-about">
+                                      {pos.industry && <b>{pos.industry} — </b>}{pos.about}
+                                    </p>
+                                  ) : null;
+                                })()}
                                 <RangeChart
                                   symbol={HOLDINGS.positions.find((p) => p.ticker === r.ticker)?.yahoo ?? r.ticker}
                                   currency={r.currency}
@@ -899,7 +912,18 @@ export default function Dashboard() {
                             )}
                           </span>
                         </div>
-                        {whyOpen && p.why && <p className="plan-why">{p.why}</p>}
+                        {whyOpen && p.why && (
+                          <div className="plan-why">
+                            {(p.industry || p.about) && (
+                              <p className="plan-about">
+                                {p.industry && <b>{p.industry}</b>}
+                                {p.industry && p.about && <span className="sep"> — </span>}
+                                {p.about}
+                              </p>
+                            )}
+                            <p>{p.why}</p>
+                          </div>
+                        )}
                       </Fragment>
                     );
                   })}

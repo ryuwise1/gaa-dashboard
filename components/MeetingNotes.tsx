@@ -2,8 +2,33 @@
 
 import { useMemo, useState } from "react";
 import notesJson from "@/data/meeting-notes.json";
-import { HOLDINGS, fmtLocalPrice, fmtPct, fmtSignedUsd, type Currency, type HoldingRow } from "@/lib/portfolio";
+import Logo from "@/components/Logo";
+import { HOLDINGS, fmtLocalPrice, fmtPct, fmtSignedUsd, tickerColorVar, type Currency, type HoldingRow } from "@/lib/portfolio";
 import { TRADES, fmtTradeDate, realizedLots } from "@/lib/trades";
+
+/**
+ * 회의록 문단은 한 덩어리 문자열이라 읽기 힘들다.
+ * 원형 숫자(①②…)로 항목이 이어지면 그 앞에서 자르고, 없으면 문장 경계("~다." 뒤 공백)에서 자른다.
+ * 첫 조각이 마커 없이 시작하면 리드 문장으로 따로 둔다 (예: "8/26 집행 완료 3건: ① … ② …").
+ */
+const MARK = /^[①-⑳]/;
+function splitNote(s: string): { lead: string | null; items: string[] } {
+  const circled = s.split(/(?=[①-⑳])/).map((x) => x.trim()).filter(Boolean);
+  if (circled.length > 1) {
+    const lead = MARK.test(circled[0]) ? null : circled[0];
+    return { lead, items: lead ? circled.slice(1) : circled };
+  }
+  const sents = s.split(/(?<=[다요]\.)\s+/).map((x) => x.trim()).filter(Boolean);
+  return { lead: null, items: sents };
+}
+/** 원형 숫자로 시작하는 항목은 불릿을 끄고 숫자를 내어쓰기한다 — 마커가 두 번 찍히지 않게 */
+function Items({ items }: { items: string[] }) {
+  return (
+    <ul className="mtg-list">
+      {items.map((s, i) => <li key={i} data-marked={MARK.test(s) || undefined}>{s}</li>)}
+    </ul>
+  );
+}
 
 interface Note {
   no: number; date: string; title: string;
@@ -20,7 +45,8 @@ const NAME = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
  * 지금 어떤 성과인지를 원장에서 자동으로 되짚는다. 팀 전용 화면.
  */
 export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
-  const [open, setOpen] = useState<number | null>(NOTES[NOTES.length - 1]?.no ?? null);
+  // 기본은 전부 접힘 — 목록에서 회차·성적 요약만 훑고, 필요한 회의만 펼친다 (9/9)
+  const [open, setOpen] = useState<number | null>(null);
 
   const rowBy = useMemo(() => new Map(rows.map((r) => [r.ticker, r])), [rows]);
 
@@ -72,20 +98,31 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
 
             {isOpen && (
               <div className="mtg-body">
-                <p className="mtg-context">{n.context}</p>
-                <div className="mtg-agenda">
-                  <div className="h">논의</div>
-                  <ul>{n.agenda.map((a, i) => <li key={i}>{a}</li>)}</ul>
+                <div className="mtg-agenda mtg-prose">
+                  <div className="h">배경</div>
+                  <p className="mtg-context">{n.context}</p>
                 </div>
-                <div className="mtg-agenda">
+                <div className="mtg-agenda mtg-prose">
+                  <div className="h">논의</div>
+                  <Items items={n.agenda} />
+                </div>
+                <div className="mtg-agenda mtg-prose">
                   <div className="h">결정</div>
-                  <p>{n.decisions}</p>
+                  {(() => {
+                    const { lead, items } = splitNote(n.decisions);
+                    return (
+                      <>
+                        {lead && <p className="mtg-lead">{lead}</p>}
+                        <Items items={items} />
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {n.background && (
-                  <div className="mtg-agenda">
+                  <div className="mtg-agenda mtg-prose">
                     <div className="h">개시 포트폴리오 — 종목별 선정 근거</div>
-                    <ul>{n.background.map((b, i) => <li key={i}>{b}</li>)}</ul>
+                    <Items items={n.background} />
                   </div>
                 )}
 
@@ -95,19 +132,25 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
                     <ul className="mtg-perf">
                       {p.sells.map((l) => (
                         <li key={"s" + l.ticker} className="num">
-                          <b>{NAME.get(l.ticker) ?? l.ticker}</b> {l.qty}주 익절 —
-                          확정 <i className={l.gainUsd >= 0 ? "gain" : "loss"}>
-                            {fmtSignedUsd(l.gainUsd)} ({fmtPct(l.pct, 1)})
-                          </i>
+                          <Logo ticker={l.ticker} name={NAME.get(l.ticker) ?? l.ticker} color={tickerColorVar(l.ticker, 0)} size={20} />
+                          <span className="mtg-perf-txt">
+                            <b>{NAME.get(l.ticker) ?? l.ticker}</b> {l.qty}주 익절 —
+                            확정 <i className={l.gainUsd >= 0 ? "gain" : "loss"}>
+                              {fmtSignedUsd(l.gainUsd)} ({fmtPct(l.pct, 1)})
+                            </i>
+                          </span>
                         </li>
                       ))}
                       {p.buys.map(({ t, nowPct }) => (
                         <li key={"b" + t.ticker + t.qty} className="num">
-                          <b>{NAME.get(t.ticker) ?? t.ticker}</b> {t.qty.toLocaleString()}주 @{" "}
-                          {fmtLocalPrice(t.currency as Currency, t.price)} →{" "}
-                          {nowPct == null ? "—" : (
-                            <i className={nowPct > 0 ? "gain" : nowPct < 0 ? "loss" : "flat"}>{fmtPct(nowPct, 1)}</i>
-                          )}
+                          <Logo ticker={t.ticker} name={NAME.get(t.ticker) ?? t.ticker} color={tickerColorVar(t.ticker, 0)} size={20} />
+                          <span className="mtg-perf-txt">
+                            <b>{NAME.get(t.ticker) ?? t.ticker}</b> {t.qty.toLocaleString()}주 @{" "}
+                            {fmtLocalPrice(t.currency as Currency, t.price)} →{" "}
+                            {nowPct == null ? "—" : (
+                              <i className={nowPct > 0 ? "gain" : nowPct < 0 ? "loss" : "flat"}>{fmtPct(nowPct, 1)}</i>
+                            )}
+                          </span>
                         </li>
                       ))}
                     </ul>
