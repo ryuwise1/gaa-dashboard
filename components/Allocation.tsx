@@ -14,7 +14,7 @@ import { AUM_USD, cashUsd, costOf } from "@/lib/trades";
 const BAND = 0.25;
 
 /** 괴리의 원인. 숫자는 같아도 성격이 정반대라 섞으면 액션이 안 나온다. */
-type Cause = "미집행" | "집행 부족" | "드리프트" | "정상";
+type Cause = "미집행" | "집행 부족" | "축소 미집행" | "드리프트" | "정상";
 
 export interface AllocRow {
   key: string;
@@ -26,6 +26,7 @@ export interface AllocRow {
   gap: number;           // ap − mp
   cause: Cause;
   shortfallUsd: number;  // 목표 대비 덜 집행한 금액 (집행분만)
+  excessUsd: number;     // 목표를 낮춘 뒤 아직 매도하지 않은 금액 (원가 기준)
   pnlUsd: number | null;
   share: number | null;  // 총손익 기여도
   outOfBand: boolean;
@@ -45,11 +46,16 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
       const ap = nav > 0 ? (r?.valueUsd ?? 0) / nav : 0;
       const spent = costOf(p.ticker)?.usd ?? 0;
       const shortfall = Math.max(p.targetUsd - spent, 0);
+      // 취득원가가 목표를 넘는다 = 목표를 낮췄는데 아직 안 팔았다.
+      // 가격이 올라 생긴 드리프트와는 할 일이 정반대(매도 집행)라 따로 잡는다.
+      const excess = Math.max(spent - p.targetUsd, 0);
 
-      // 미매수 → 미집행. 목표액의 5% 넘게 덜 샀으면 집행 부족.
-      // 둘 다 아닌데 벌어져 있으면 가격이 만든 드리프트다.
+      // 미매수 → 미집행. 원가가 목표를 5% 넘게 초과하면 축소 미집행.
+      // 목표액의 5% 넘게 덜 샀으면 집행 부족.
+      // 어느 쪽도 아닌데 벌어져 있으면 가격이 만든 드리프트다.
       let cause: Cause;
       if (p.status === "미매수" || spent <= 0) cause = "미집행";
+      else if (excess > p.targetUsd * 0.05) cause = "축소 미집행";
       else if (p.status !== "매수완료" && shortfall > p.targetUsd * 0.05) cause = "집행 부족";
       else cause = Math.abs(ap - mp) > mp * BAND ? "드리프트" : "정상";
 
@@ -60,7 +66,8 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
         name: p.name,
         sector: p.sector,
         mp, ap, gap: ap - mp, cause,
-        shortfallUsd: cause === "정상" || cause === "드리프트" ? 0 : shortfall,
+        shortfallUsd: cause === "미집행" || cause === "집행 부족" ? shortfall : 0,
+        excessUsd: cause === "축소 미집행" ? excess : 0,
         pnlUsd,
         share: pnlTotal !== 0 && pnlUsd != null ? pnlUsd / pnlTotal : null,
         outOfBand: mp > 0 && Math.abs(ap - mp) > mp * BAND,
@@ -78,6 +85,7 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
       sector: "현금",
       mp: 0, ap, gap: ap, cause: "미집행",
       shortfallUsd: cashUsd,
+      excessUsd: 0,
       pnlUsd: null, share: null,
       outOfBand: true,
     });
@@ -88,7 +96,11 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
 }
 
 function causeClass(c: Cause): string {
-  return c === "미집행" ? "miss" : c === "집행 부족" ? "short" : c === "드리프트" ? "drift" : "ok";
+  return c === "미집행" ? "miss"
+    : c === "집행 부족" ? "short"
+    : c === "축소 미집행" ? "trim"
+    : c === "드리프트" ? "drift"
+    : "ok";
 }
 
 export default function Allocation({
@@ -105,6 +117,8 @@ export default function Allocation({
   const shortfall = alloc
     .filter((a) => a.ticker != null && (a.cause === "미집행" || a.cause === "집행 부족"))
     .reduce((s, a) => s + a.shortfallUsd, 0);
+  // 축소 미집행은 방향이 반대(팔아야 할 금액)라 미체결 목표와 절대 합치지 않는다
+  const trimPending = alloc.reduce((s, a) => s + a.excessUsd, 0);
   // 발산형 막대의 스케일 — 가장 큰 괴리가 절반 폭을 차지하게 맞춘다
   const maxGap = Math.max(...alloc.map((a) => Math.abs(a.gap)), 0.01);
 
@@ -113,7 +127,9 @@ export default function Allocation({
       <div className="section-head">
         <h2 className="sr-only">AP · MP 비중 괴리</h2>
         <span className="meta num">
-          밴드(±{Math.round(BAND * 100)}%) 이탈 {offBand}종목 · 미체결 목표 {fmtUsd(shortfall)} · 가용 현금 {fmtUsd(cash)}
+          밴드(±{Math.round(BAND * 100)}%) 이탈 {offBand}종목 · 미체결 목표 {fmtUsd(shortfall)}
+          {trimPending > 0 && <> · 축소 대기 {fmtUsd(trimPending)}</>}
+          {" "}· 가용 현금 {fmtUsd(cash)}
         </span>
       </div>
 
@@ -122,6 +138,7 @@ export default function Allocation({
         <ul>
           <li><em>미집행</em> — 아직 안 샀다 → 집행이 할 일</li>
           <li><em>집행 부족</em> — 목표만큼 못 채웠다 → 잔여 매수가 할 일</li>
+          <li><em>축소 미집행</em> — 목표를 낮췄는데 아직 안 팔았다 → 매도가 할 일</li>
           <li><em>드리프트</em> — 사놓았는데 가격이 움직였다 → 밴드(±25%) 이탈 시 리밸런싱</li>
         </ul>
       </details>
@@ -169,6 +186,11 @@ export default function Allocation({
               {a.shortfallUsd > 0 && (
                 <span className="alloc-short" title="목표까지 남은 집행 금액">
                   잔여 {fmtUsd(a.shortfallUsd)}
+                </span>
+              )}
+              {a.excessUsd > 0 && (
+                <span className="alloc-short trim" title="목표를 낮춘 뒤 아직 매도하지 않은 금액 (취득원가 기준)">
+                  초과 {fmtUsd(a.excessUsd)}
                 </span>
               )}
             </span>

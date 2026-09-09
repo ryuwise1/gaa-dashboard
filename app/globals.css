@@ -1384,6 +1384,7 @@ a { color: var(--accent); }
 }
 .alloc-cause.miss  { background: var(--gain-bg); color: var(--gain); }
 .alloc-cause.short { background: var(--status-buying-bg); color: var(--status-buying); }
+.alloc-cause.trim  { background: color-mix(in srgb, var(--s4) 18%, transparent); color: var(--s4); }
 .alloc-cause.drift { background: var(--chip-bg); color: var(--chip-ink); }
 .alloc-cause.ok    { background: var(--status-done-bg); color: var(--status-done); }
 
@@ -1421,6 +1422,7 @@ a { color: var(--accent); }
 .alloc-gapn.over  { color: var(--s3); }
 .alloc-gapn.under { color: var(--s2); }
 .alloc-short { flex: none; font-size: 10.5px; color: var(--muted); }
+.alloc-short.trim { color: var(--s4); font-weight: 700; }
 
 .alloc-share { text-align: right; line-height: 1.35; }
 .alloc-share b { font-size: 12px; font-weight: 700; }
