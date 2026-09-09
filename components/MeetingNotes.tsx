@@ -13,12 +13,14 @@ import { TRADES, fmtTradeDate, realizedLots } from "@/lib/trades";
  */
 const MARK = /^[①-⑳]/;
 function splitNote(s: string): { lead: string | null; items: string[] } {
-  const circled = s.split(/(?=[①-⑳])/).map((x) => x.trim()).filter(Boolean);
+  // 항목 머리의 마커만 자른다 — "(… 안건 ⑦)."처럼 문장 안에 인용된 원형 숫자는 그대로 둔다
+  const circled = s.split(/(?<=^|[\s:：])(?=[①-⑳]\s)/).map((x) => x.trim()).filter(Boolean);
   if (circled.length > 1) {
     const lead = MARK.test(circled[0]) ? null : circled[0];
     return { lead, items: lead ? circled.slice(1) : circled };
   }
-  const sents = s.split(/(?<=[다요]\.)\s+/).map((x) => x.trim()).filter(Boolean);
+  // 문장 끝 = 한글·닫는 괄호 뒤의 마침표 + 공백 ("~함. ", "~기로 함. "도 잡힌다). 숫자 뒤 마침표(3.5%, 8/26.)는 건너뛴다
+  const sents = s.split(/(?<=[가-힣)\]]\.)\s+/).map((x) => x.trim()).filter(Boolean);
   return { lead: null, items: sents };
 }
 /** 원형 숫자로 시작하는 항목은 불릿을 끄고 숫자를 내어쓰기한다 — 마커가 두 번 찍히지 않게 */
@@ -130,8 +132,8 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
                   <div className="mtg-agenda">
                     <div className="h">이 회의의 성적표 (현재 기준)</div>
                     <ul className="mtg-perf">
-                      {p.sells.map((l) => (
-                        <li key={"s" + l.ticker} className="num">
+                      {p.sells.map((l, i) => (
+                        <li key={`s-${l.ticker}-${l.date}-${i}`} className="num">
                           <Logo ticker={l.ticker} name={NAME.get(l.ticker) ?? l.ticker} color={tickerColorVar(l.ticker, 0)} size={20} />
                           <span className="mtg-perf-txt">
                             <b>{NAME.get(l.ticker) ?? l.ticker}</b> {l.qty}주 익절 —
@@ -141,8 +143,8 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
                           </span>
                         </li>
                       ))}
-                      {p.buys.map(({ t, nowPct }) => (
-                        <li key={"b" + t.ticker + t.qty} className="num">
+                      {p.buys.map(({ t, nowPct }, i) => (
+                        <li key={`b-${t.ticker}-${t.date}-${i}`} className="num">
                           <Logo ticker={t.ticker} name={NAME.get(t.ticker) ?? t.ticker} color={tickerColorVar(t.ticker, 0)} size={20} />
                           <span className="mtg-perf-txt">
                             <b>{NAME.get(t.ticker) ?? t.ticker}</b> {t.qty.toLocaleString()}주 @{" "}

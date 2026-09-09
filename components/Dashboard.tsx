@@ -897,6 +897,7 @@ export default function Dashboard() {
                           data-open={whyOpen || undefined}
                           role={p.why ? "button" : undefined}
                           tabIndex={p.why ? 0 : undefined}
+                          aria-expanded={p.why ? whyOpen : undefined}
                           onClick={() => p.why && setPlanWhy(whyOpen ? null : p.ticker)}
                           onKeyDown={(e) => {
                             if (p.why && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); setPlanWhy(whyOpen ? null : p.ticker); }

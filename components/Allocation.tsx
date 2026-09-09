@@ -7,7 +7,7 @@ import {
   HOLDINGS, fmtPct, fmtUsd, fmtSignedMoney, sectorColorVar, tickerColorVar,
   type HoldingRow, type Unit,
 } from "@/lib/portfolio";
-import { AUM_USD, cashUsd, costOf } from "@/lib/trades";
+import { AUM_USD, cashUsd, costOf, dividendUsd } from "@/lib/trades";
 
 /**
  * 목표 대비 허용 밴드 — 절대값(±1%p)이 아니라 목표의 ±25%.
@@ -55,7 +55,8 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
       const shortfall = Math.max(p.targetUsd - spent, 0);
       // 취득원가가 목표를 넘는다 = 목표를 낮췄는데 아직 안 팔았다.
       // 가격이 올라 생긴 드리프트와는 할 일이 정반대(매도 집행)라 따로 잡는다.
-      const excess = Math.max(spent - p.targetUsd, 0);
+      // SGOV는 배당 자동 재투자로 원가가 계속 불어난다 — 그 누적분은 "팔아야 할 초과"가 아니므로 뺀다
+      const excess = Math.max(spent - p.targetUsd - (p.ticker === "SGOV" ? dividendUsd : 0), 0);
 
       // 미매수 → 미집행. 원가가 목표를 5% 넘게 초과하면 축소 미집행.
       // 목표액의 5% 넘게 덜 샀으면 집행 부족.
@@ -101,8 +102,10 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
     });
   }
 
-  // 목표 비중이 큰 순서 — 미집행 현금(MP 0)은 자연히 맨 아래. 같은 비중끼리는 괴리 큰 순.
-  out.sort((a, b) => (b.mp - a.mp) || (Math.abs(b.gap) - Math.abs(a.gap)));
+  // 목표 비중이 큰 순서 — 미집행 현금(MP 0)은 자연히 맨 아래.
+  // 같은 비중끼리는 holdings.json 순서로 고정한다 — 괴리 순으로 두면 시세 갱신마다 행이 움직여 펼쳐 둔 행이 튄다.
+  const order = new Map(HOLDINGS.positions.map((p, i) => [p.ticker, i]));
+  out.sort((a, b) => (b.mp - a.mp) || ((order.get(a.ticker ?? "") ?? 1e9) - (order.get(b.ticker ?? "") ?? 1e9)));
   return { rows: out, nav, pnlTotal, cash: cashUsd };
 }
 
