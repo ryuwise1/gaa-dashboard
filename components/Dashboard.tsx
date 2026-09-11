@@ -27,16 +27,17 @@ import StoryBlock from "@/components/StoryBlock";
 import ActionBar from "@/components/ActionBar";
 import Dividends from "@/components/Dividends";
 import WhyBlock from "@/components/WhyBlock";
+import Guide from "@/components/Guide";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
 
-type Tab = "보유 현황" | "매수·매도 플랜" | "AP·MP" | "매매 내역" | "오늘의 분석" | "캘린더" | "회의록" | "보유 비중";
+type Tab = "보유 현황" | "매수·매도 플랜" | "AP·MP" | "매매 내역" | "오늘의 분석" | "캘린더" | "회의록" | "안내" | "보유 비중";
 
 // 탭 딥링크 — ?tab=calendar 처럼 특정 탭을 바로 열어 공유할 수 있게 한다
 const TAB_SLUGS: Record<string, Tab> = {
   holdings: "보유 현황", plan: "매수·매도 플랜", apmp: "AP·MP", trades: "매매 내역",
-  signals: "오늘의 분석", calendar: "캘린더", notes: "회의록",
+  signals: "오늘의 분석", calendar: "캘린더", notes: "회의록", guide: "안내",
 };
 const TEAM_ONLY_TABS: Tab[] = ["오늘의 분석", "회의록"];
 type Figure = "현재가" | "평가금";
@@ -323,6 +324,7 @@ export default function Dashboard() {
   const TABS: Tab[] = [
     "보유 현황", "매수·매도 플랜", "AP·MP", "매매 내역", "캘린더",
     ...(teamMode ? (["오늘의 분석", "회의록"] as Tab[]) : []),
+    "안내",
     "보유 비중",
   ];
   const tabCount: Record<Tab, string> = {
@@ -333,6 +335,7 @@ export default function Dashboard() {
     "오늘의 분석": "",
     "캘린더": "",
     "회의록": "",
+    "안내": "",
     "보유 비중": `${segments.length}`,
   };
 
@@ -955,6 +958,8 @@ export default function Dashboard() {
           {tab === "캘린더" && <Calendar team={teamMode} />}
 
           {tab === "회의록" && teamMode && <MeetingNotes rows={rows} />}
+
+          {tab === "안내" && <Guide team={teamMode} />}
 
           {tab === "보유 비중" && <div role="tabpanel" aria-label="보유 비중">{donutSection}</div>}
 

@@ -1527,3 +1527,21 @@ a { color: var(--accent); }
   .alloc-row .nm .logo { display: none; }
   .alloc-cause { font-size: 9.5px; padding: 1px 4px; }
 }
+
+/* ── 안내 탭 — 기능 목록을 화면 순서대로. 발표자용 체크리스트 겸용 ── */
+.guide-lead { margin: 0 0 18px; font-size: 13px; line-height: 1.7; color: var(--ink-2); max-width: 68ch; }
+.guide-lead b { color: var(--ink); font-weight: 700; }
+.guide-sec { margin-bottom: 18px; }
+.guide-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 6px; }
+.guide-head h3 { margin: 0; font-size: 14px; font-weight: 800; }
+.guide-where { font-size: 11px; color: var(--muted); }
+.guide-list { list-style: none; margin: 0; padding: 0; }
+.guide-list li { display: flex; gap: 10px; padding: 7px 0; box-shadow: inset 0 -1px 0 var(--hairline); }
+.guide-list li:last-child { box-shadow: none; }
+.guide-n { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--chip-bg); color: var(--chip-ink); font-size: 11px; font-weight: 800; margin-top: 1px; }
+.guide-body { min-width: 0; font-size: 13px; line-height: 1.65; color: var(--ink); }
+.guide-body b { font-weight: 700; margin-right: 6px; }
+.guide-what { display: block; color: var(--ink-2); font-size: 12.5px; }
+.guide-team { font-style: normal; font-size: 10px; font-weight: 800; color: var(--status-done); background: var(--status-done-bg);
+  padding: 1px 6px; border-radius: 999px; margin-right: 6px; vertical-align: 1px; }
