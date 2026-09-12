@@ -26,6 +26,7 @@ import ChangeLog from "@/components/ChangeLog";
 import StoryBlock from "@/components/StoryBlock";
 import ActionBar from "@/components/ActionBar";
 import Dividends from "@/components/Dividends";
+import TradeForm from "@/components/TradeForm";
 import WhyBlock from "@/components/WhyBlock";
 import Guide from "@/components/Guide";
 
@@ -948,6 +949,7 @@ export default function Dashboard() {
 
           {tab === "매매 내역" && (
             <>
+              {teamMode && <TradeForm quotes={quotes} />}
               <TradeLog unit={unit} usdkrw={fx} />
               <Dividends />
             </>

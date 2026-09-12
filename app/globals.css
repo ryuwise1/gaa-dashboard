@@ -1545,3 +1545,88 @@ a { color: var(--accent); }
 .guide-what { display: block; color: var(--ink-2); font-size: 12.5px; }
 .guide-team { font-style: normal; font-size: 10px; font-weight: 800; color: var(--status-done); background: var(--status-done-bg);
   padding: 1px 6px; border-radius: 999px; margin-right: 6px; vertical-align: 1px; }
+
+/* ── 매매 기록 폼 (팀 전용) ──────────────────────────────────────────
+   원장에 직접 쓰는 화면이라 실수 비용이 크다 — 경고·합계·미리보기를
+   버튼 주위에 모아 두고, 확인 없이 제출되지 않게 한다. */
+.tf-open { display: flex; align-items: center; gap: 10px; margin: 4px 0 14px; }
+.tf-open button {
+  padding: 7px 14px; border: 1px solid var(--hairline-2); border-radius: 8px;
+  background: var(--bg); color: var(--ink); font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.tf-open button:hover { border-color: var(--accent); color: var(--accent); }
+.tf-open .meta { font-size: 11.5px; color: var(--muted); }
+
+.tf {
+  margin: 4px 0 18px; padding: 14px 16px 16px;
+  border: 1px solid var(--hairline-2); border-radius: 12px; background: var(--sunken);
+}
+.tf-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+.tf-head b { font-size: 13px; }
+.tf-head .meta { font-size: 11px; color: var(--muted); }
+.tf-x { margin-left: auto; border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 13px; }
+
+.tf-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 12px; }
+.tf-grid label { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.tf-grid label > span { font-size: 11px; color: var(--muted); font-weight: 600; }
+.tf-grid label > span i { font-style: normal; font-weight: 400; }
+.tf-cur { color: var(--accent); }
+.tf-wide { grid-column: 1 / -1; }
+.tf input, .tf select, .tf textarea {
+  width: 100%; padding: 7px 9px; border: 1px solid var(--hairline-2); border-radius: 7px;
+  background: var(--bg); color: var(--ink); font-size: 12.5px; font-family: inherit;
+}
+.tf textarea { resize: vertical; line-height: 1.55; }
+.tf input:focus, .tf select:focus, .tf textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.tf-side { display: flex; gap: 6px; }
+.tf-side button {
+  flex: 1; padding: 7px 0; border: 1px solid var(--hairline-2); border-radius: 7px;
+  background: var(--bg); color: var(--muted); font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.tf-side button[data-on] { border-color: var(--accent); background: var(--accent); color: #fff; }
+
+.tf-price { display: flex; gap: 6px; }
+.tf-price button {
+  flex: none; padding: 0 9px; border: 1px solid var(--hairline-2); border-radius: 7px;
+  background: var(--bg); color: var(--ink-2); font-size: 11px; white-space: nowrap; cursor: pointer;
+}
+.tf-price button:hover { border-color: var(--accent); color: var(--accent); }
+
+.tf-warn, .tf-err {
+  margin: 10px 0 0; padding: 8px 10px; border-radius: 7px;
+  font-size: 11.5px; line-height: 1.6;
+}
+.tf-warn { background: var(--status-buying-bg); color: var(--status-buying); }
+.tf-err { background: var(--gain-bg); color: var(--gain); }
+
+.tf-sum { margin: 12px 0 0; font-size: 12.5px; }
+.tf-sum b { font-size: 14px; }
+.tf-sum .meta { font-size: 11.5px; color: var(--muted); }
+
+.tf-actions { margin-top: 12px; display: flex; flex-direction: column; gap: 5px; }
+.tf-actions .meta { font-size: 11px; color: var(--muted); font-weight: 600; }
+.tf-chk { display: flex; align-items: center; gap: 7px; font-size: 11.5px; color: var(--ink-2); }
+.tf-chk input { width: auto; }
+
+.tf-submit { display: flex; gap: 8px; margin-top: 14px; }
+.tf-submit input { flex: 1; max-width: 220px; }
+.tf-submit button {
+  padding: 8px 18px; border: 0; border-radius: 7px;
+  background: var(--accent); color: #fff; font-size: 12.5px; font-weight: 700; cursor: pointer;
+}
+.tf-submit button:disabled { background: var(--chip-bg); color: var(--muted); cursor: not-allowed; }
+
+.tf-preview { display: flex; align-items: center; gap: 7px; margin: 12px 0 0; font-size: 11.5px; color: var(--muted); }
+.tf-done p { margin: 0 0 6px; font-size: 12.5px; }
+.tf-done code { padding: 1px 5px; border-radius: 4px; background: var(--chip-bg); font-size: 11.5px; }
+.tf-done button {
+  margin-top: 6px; padding: 6px 14px; border: 1px solid var(--hairline-2); border-radius: 7px;
+  background: var(--bg); color: var(--ink); font-size: 12px; cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .tf-grid { grid-template-columns: 1fr 1fr; }
+  .tf-submit { flex-direction: column; }
+  .tf-submit input { max-width: none; }
+}
