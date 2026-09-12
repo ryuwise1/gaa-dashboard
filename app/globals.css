@@ -1630,3 +1630,8 @@ a { color: var(--accent); }
   .tf-submit { flex-direction: column; }
   .tf-submit input { max-width: none; }
 }
+
+/* 미충족 항목 안내 — 비활성 버튼은 반드시 이유를 같이 보여준다 */
+.tf-count { font-style: normal; margin-left: 6px; font-size: 10.5px; color: var(--muted); }
+.tf-count.short { color: var(--status-buying); font-weight: 700; }
+.tf-missing { margin: 8px 0 0; font-size: 11.5px; color: var(--muted); }

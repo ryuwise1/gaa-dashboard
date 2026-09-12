@@ -69,9 +69,16 @@ export default function TradeForm({ quotes }: { quotes: QuoteMap }) {
   if (pos && pos.currency !== "USD" && pos.currency !== "KRW") {
     problems.push(`${pos.currency} 종목은 보드에서 기록할 수 없습니다 — 원장에 직접 적어주세요.`);
   }
-  const ready =
-    !!pos && Number.isFinite(qtyNum) && qtyNum > 0 && Number.isFinite(priceNum) && priceNum > 0 &&
-    note.trim().length >= 10 && secret.length > 0 && problems.length === 0;
+  // 버튼이 꺼져 있으면 왜 꺼져 있는지 반드시 화면에 말해야 한다.
+  // 이유 없는 비활성 버튼은 "안 된다"는 인상만 주고 사용자를 막아세운다.
+  const missing: string[] = [];
+  if (!pos) missing.push("종목");
+  if (!(Number.isFinite(qtyNum) && qtyNum > 0)) missing.push("수량");
+  if (!(Number.isFinite(priceNum) && priceNum > 0)) missing.push("체결가");
+  const noteLeft = 10 - note.trim().length;
+  if (noteLeft > 0) missing.push(`체결 근거 ${noteLeft}자 더`);
+  if (!secret) missing.push("집행 비밀번호");
+  const ready = missing.length === 0 && problems.length === 0;
 
   const submit = async () => {
     setBusy(true); setError(null);
@@ -174,7 +181,12 @@ export default function TradeForm({ quotes }: { quotes: QuoteMap }) {
             </label>
 
             <label className="tf-wide">
-              <span>체결 근거 <i className="meta">— 나중에 우리가 읽을 기록입니다 (10자 이상)</i></span>
+              <span>
+                체결 근거 <i className="meta">— 나중에 우리가 읽을 기록입니다</i>
+                <i className={`tf-count${noteLeft > 0 ? " short" : ""}`}>
+                  {noteLeft > 0 ? `${noteLeft}자 더` : `${note.trim().length}자`}
+                </i>
+              </span>
               <textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)}
                 placeholder="왜 이 시점에 이 수량인지. 반증 조건이 있으면 같이 적으세요." />
             </label>
@@ -191,7 +203,7 @@ export default function TradeForm({ quotes }: { quotes: QuoteMap }) {
           {estUsd != null && (
             <p className="tf-sum num">
               {side} {qtyNum.toLocaleString()}주 × {fmtLocalPrice(pos!.currency, priceNum)} ={" "}
-              <b>{fmtUsd(estUsd)}</b>
+              <b>{fmtUsd(estUsd, 2)}</b>
               <span className="meta"> · 기록 후 현금 {fmtUsd(side === "매수" ? cashUsd - estUsd : cashUsd + estUsd)}</span>
             </p>
           )}
@@ -216,6 +228,9 @@ export default function TradeForm({ quotes }: { quotes: QuoteMap }) {
               {busy ? "기록 중…" : "원장에 기록"}
             </button>
           </div>
+          {missing.length > 0 && (
+            <p className="tf-missing">아직 못 채운 항목: {missing.join(" · ")}</p>
+          )}
           {error && <p className="tf-err">{error}</p>}
           {pos && (
             <p className="tf-preview meta">
