@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "gaa-dev",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "port": 3000
+      "name": "gaa-dashboard",
+      "runtimeExecutable": "C:/Program Files/nodejs/node.exe",
+      "runtimeArgs": ["C:/Users/ADMIN/Desktop/gaa-dashboard/node_modules/next/dist/bin/next", "dev", "C:/Users/ADMIN/Desktop/gaa-dashboard", "--port", "3100"],
+      "port": 3100
     }
   ]
 }

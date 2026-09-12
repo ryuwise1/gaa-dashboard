@@ -9,6 +9,15 @@ import { useState } from "react";
  * 화이트리스트를 쓰는 이유: CDN이 티커만 보고 응답하기 때문에 BA(보잉)를
  * BA.L(BAE Systems)로 잘못 붙이는 사고가 난다. 유럽·대만 상장은 아예 없다.
  */
+/**
+ * 자체 호스팅 로고 — 토스 CDN에 없는 종목. `public/logos/`에 둔다.
+ * 투명 PNG라 `.logo`의 --logo-bg가 배경이 되어 라이트·다크 양쪽에 맞는다.
+ * CDN보다 먼저 본다 (외부 CDN이 죽어도 안 깨진다).
+ */
+const LOCAL: Record<string, string> = {
+  RBRK: "/logos/RBRK.png", // 토스 CDN 403 — 자산 자체가 없다
+};
+
 const CDN: Record<string, string> = {
   VT: "VT", MSFT: "MSFT", META: "META", INTC: "INTC", QCOM: "QCOM",
   AAPL: "AAPL", DELL: "DELL", HPQ: "HPQ", XOM: "XOM", CVX: "CVX", SHEL: "SHEL",
@@ -17,7 +26,7 @@ const CDN: Record<string, string> = {
   // 오늘의 분석 관심 종목 (미보유) — 토스 CDN에 존재 확인된 미국 대형주
   NVDA: "NVDA", TSM: "TSM", AVGO: "AVGO", AMD: "AMD", MU: "MU", ASML: "ASML",
   GOOGL: "GOOGL", AMZN: "AMZN", ORCL: "ORCL", COP: "COP", SLB: "SLB", GS: "GS", MS: "MS",
-  MRVL: "MRVL", RBRK: "RBRK", CRWD: "CRWD", // ALM(Almonty)은 토스 CDN 미확인 — 모노그램 폴백
+  MRVL: "MRVL", CRWD: "CRWD", // RBRK는 LOCAL에 있고, ALM(Almonty)은 토스 CDN 미확인 — 모노그램 폴백
 };
 
 /** 모노그램에 쓸 짧은 글자 — 로고가 없는 종목용 */
@@ -65,10 +74,12 @@ export default function Logo({
   any?: boolean;
 }) {
   const [failed, setFailed] = useState(false);
+  const local = LOCAL[ticker];
   const code = CDN[ticker] ?? (any && /^[A-Z]{1,5}$/.test(ticker) ? ticker : undefined);
+  const src = local ?? (code ? `https://static.toss.im/png-icons/securities/icn-sec-fill-${code}.png` : undefined);
   const label = MONO[ticker] ?? ticker.replace(/\..*$/, "").slice(0, 3);
 
-  if (!code || failed) {
+  if (!src || failed) {
     return (
       <span
         className="logo logo-mono"
@@ -87,11 +98,14 @@ export default function Logo({
     // eslint-disable-next-line @next/next/no-img-element
     <img
       className="logo"
-      src={`https://static.toss.im/png-icons/securities/icn-sec-fill-${code}.png`}
+      src={src}
       alt=""
       width={size}
       height={size}
       decoding="async"
+      // SSR된 <img>는 하이드레이션 전에 이미 로드가 끝날 수 있다. 그때 난 에러는
+      // onError로 안 잡히므로(핸들러가 아직 안 붙었다) 마운트 시점에 한 번 더 본다.
+      ref={(el) => { if (el?.complete && el.naturalWidth === 0) setFailed(true); }}
       onError={() => setFailed(true)}
       title={name}
     />
