@@ -6,4 +6,3 @@ npm-debug.log*
 tsconfig.tsbuildinfo
 # 카드·리포트 PNG 산출물 — tools/ 스크립트로 재생성 가능
 out/
-.claude/launch.json
