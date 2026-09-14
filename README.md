@@ -1,33 +1,16 @@
-# 글리프자운팀 포트폴리오 대시보드
+# GLIF 자산운용팀 포트폴리오 대시보드
 
-팀 전체가 보는 실시간(준실시간) 포트폴리오 웹 대시보드. Next.js + Vercel.
+성균관대학교 금융투자학회 GLIF 26-2 자산운용팀의 모의 포트폴리오(가상 AUM $500,000)를 실시간 시세로 보여 주는 웹 대시보드입니다. 실제 자금은 들어가지 않습니다.
 
-## 구조
+- 사이트: https://gaa-dashboard-eight.vercel.app
+- 화면별 기능 설명: 사이트의 "안내" 탭 (https://gaa-dashboard-eight.vercel.app/?tab=guide)
 
-- `data/holdings.json` — **현재 보유 상태의 원본** (수량·평단가·상태·목표 플랜). 매매가 있으면 이 파일을 고치고 다시 배포하면 됨.
-- `data/trades.json` — **체결 원장.** 매매가 생기면 여기에 한 줄 추가한다. 화면의 매매 내역·현금·집행률·실현손익이 전부 이 파일에서 계산된다.
-  - `openingPositions` — 원장 시작(2026-07-30) 직전 보유분. 실현손익 계산의 기준점이라 지우면 안 됨.
-  - `meetings` — 정기회의 회차·날짜. 각 체결의 `meeting` 필드가 여기를 가리킨다.
-  - 각 체결: `fxToUsd`(현지통화 1단위당 USD) + `usd`(체결 USD 금액). 비USD 종목은 이 값이 있어야 현금이 정확히 계산된다.
-- `lib/trades.ts` — 원장을 되감아 종목별 장부·실현손익·현금을 만든다. 평단은 이동평균법.
-- `lib/macro.ts` — 상단 매크로 스트립에 띄우는 지표 목록 (VIX·DXY·10Y·WTI·Brent·Gold·S&P 500)
-- `app/api/quotes/route.ts` — 시세 프록시 (30초 서버 캐시). 국내는 네이버 실시간, 해외·환율·매크로는 야후. holdings + 환율 + 매크로 심볼만 허용하는 화이트리스트.
-- `components/Dashboard.tsx` — 화면 전체 (60초 자동 갱신)
-- `components/TradeLog.tsx` — 매매 내역 (체결일 그룹 · 회차 배지 · 매수/매도·종목 필터 · 확정손익)
-- `components/WeeklyReport.tsx` — 주간 운용보고 초안 생성 + 카톡용 복사
-- `middleware.ts` — `GAA_DASH_PASSWORD` 환경변수가 있으면 비밀번호 잠금
+## 기술 구성
 
-## 화면에서 볼 수 있는 것
-
-| 위치 | 내용 |
-|---|---|
-| 상단 스트립 | 보유 종목 시세 + 매크로 지표(VIX·DXY·10Y·WTI·Brent·Gold·S&P) |
-| 히어로 카드 | 평가금액·평가손익·오늘·환율 + **AUM 집행률 바 · 현금 · 총자산 · 실현손익 · 원금 대비** |
-| 보유 현황 표 | 행을 클릭하면 **그 종목의 체결 이력**이 펼쳐짐 (건수 배지로 표시) |
-| 매매 내역 | 체결일별 그룹, 몇 차 회의에서 결정했는지 배지, 매수/매도·종목 필터, 행 클릭 시 매매 근거 |
-| 주간 운용보고 초안 | 현재 시세로 포트폴리오 현황·종목별 수익률·섹터 비중을 채운 카톡용 텍스트 생성·복사 |
-
-> 섹터 비중은 **AUM 기준**으로 표기한다. 목표 비중이 AUM 기준이라 주식 평가금액 기준으로 쓰면 현금이 빠져 모든 섹터가 부풀어 보인다.
+- Next.js 16 (App Router) · React 19 · TypeScript
+- 데이터베이스 없음 — 보유 종목·체결·회의록은 `data/` 폴더의 JSON 파일이 원본
+- 시세: 국내 주식은 네이버 금융, 해외 주식·환율·지수는 Yahoo Finance (둘 다 비공식 엔드포인트라 예고 없이 막힐 수 있음)
+- 배포: Vercel — `main` 브랜치에 push하면 자동 배포
 
 ## 로컬 실행
 
@@ -36,25 +19,46 @@ npm install
 npm run dev
 ```
 
-→ http://localhost:3000
+http://localhost:3100 에서 열립니다. API 키 없이도 조회 화면은 모두 동작합니다.
 
-## Vercel 배포
+## 폴더 구조
 
-```bash
-npx vercel          # 첫 배포 (로그인 필요)
-npx vercel --prod   # 프로덕션 배포
-```
+| 경로 | 내용 |
+|---|---|
+| `components/` | 화면. `Dashboard.tsx`가 요약 카드와 탭을 묶고, 탭마다 컴포넌트가 하나씩 있음 |
+| `app/api/quotes` | 실시간 시세 (네이버 + Yahoo) |
+| `app/api/history`, `bench` | 총자산 추이(체결 원장 × 일봉 종가로 역산), 운용 시작 이후 지수 수익률 |
+| `app/api/spark`, `signals` | 종목 기간 차트(MA20·MA60·RSI), 규칙 기반 시그널 |
+| `app/api/calendar`, `dividends` | 경제지표·어닝 일정, 보유 종목 배당 |
+| `app/api/trade` | 보드에서 매매를 기록하면 GitHub에 커밋 (환경변수 필요) |
+| `lib/ledger-core.ts` | 체결 원장 리플레이 — 보유 수량·이동평균 평단·실현손익·현금 |
+| `data/trades.json` | 체결 원장. 화면의 모든 금액 계산의 원본 |
+| `data/holdings.json` | 종목·섹터·목표 비중·편입 근거·기업 설명 |
+| `data/meeting-notes.json`, `actions.json` | 회의록, 팀 할 일 |
+| `data/macro-*.json`, `kr-events.json`, `dividend-ledger.json` | 캘린더 일정, 배당 수령 기록 |
+| `research/` | 관심 종목 리서치 노트 |
+| `tools/` | 원장 정합성 검사기, 경제지표 스크랩, 보고용 PNG 카드 스크립트 |
 
-배포 후 Vercel 프로젝트 → Settings → Environment Variables에
-`GAA_DASH_PASSWORD` = 팀 공유 비밀번호 를 추가하고 재배포하면 잠금이 걸린다.
-(설정하지 않으면 링크를 아는 누구나 볼 수 있음 — 금액이 그대로 보이니 권장)
+## 데이터 흐름
 
-## 데이터 갱신 흐름
+1. 체결이 생기면 `data/trades.json`에 한 건씩 추가합니다. 팀 모드의 매매 기록 폼을 쓰면 자동으로 커밋됩니다.
+2. 원장을 날짜순으로 리플레이해 보유 수량·평단·현금·실현손익을 계산합니다.
+3. 평가액은 실시간 시세 × 보유 수량입니다. 국내 주식 원가는 체결 시점 환율로 고정해 환차손익을 따로 봅니다.
 
-1. 매매 발생 → Claude에서 `/포트업데이트 QCOM 10주 150.55 매수`
-2. 세 곳을 같이 고친다 — 노션 DB(팀 페이지) · `data/holdings.json` · **`data/trades.json`**
-3. `npx vercel deploy --prod --yes` 재배포 (또는 GitHub 연결 시 push만)
+원장을 직접 고쳤다면 `node tools/check-ledger.mjs`로 `holdings.json`의 수량·평단이 원장과 일치하는지 확인합니다.
 
-`trades.json`에 한 줄을 빠뜨리면 화면의 현금·집행률·실현손익이 전부 어긋난다. 반대로 `holdings.json`의 수량·평단은 원장을 되감으면 나오는 값이라, 둘이 안 맞으면 원장이 맞다고 보고 `holdings.json`을 고치면 된다.
+## 환경변수 (모두 선택)
 
-시세는 배포와 무관하게 Yahoo에서 실시간으로 가져온다 (거래소별 최대 15~20분 지연).
+| 변수 | 용도 |
+|---|---|
+| `GAA_DASH_PASSWORD` | 설정하면 사이트 전체에 HTTP 기본 인증을 겁니다 |
+| `GAA_TRADE_SECRET`, `GAA_GH_TOKEN` | 보드에서 매매를 기록하는 기능. 없으면 이 기능만 꺼집니다 |
+
+## 팀 모드
+
+주소 뒤에 `?team`을 붙이면 비밀번호를 묻고, 통과하면 오늘의 분석·회의록 탭, 오늘 할 일, 매매 기록 폼 같은 팀 전용 기능이 열립니다. 비밀번호 확인이 브라우저에서 이뤄지므로 보안 장치가 아니라 화면을 나누는 용도입니다.
+
+## 참고
+
+- `CLAUDE.md` — 작업 규칙과 인수인계 메모. Claude Code로 이 저장소를 열면 자동으로 읽습니다.
+- 학회 교육용 모의 운용 기록이며 투자 권유가 아닙니다.
