@@ -580,6 +580,18 @@
       "krwPerUsd": 1372.52,
       "usd": 172502.4,
       "note": "현금성 자산 확보 위함"
+    },
+    {
+      "date": "2026-09-21",
+      "ticker": "EUAD",
+      "side": "매도",
+      "qty": 398,
+      "price": 42.68,
+      "currency": "USD",
+      "fxToUsd": 1,
+      "krwPerUsd": 1372.63,
+      "usd": 16986.64,
+      "note": "현금성 자산 추가 확보 및 펀더멘털 훼손"
     }
   ]
 }
