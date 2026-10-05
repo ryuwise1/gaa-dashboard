@@ -68,9 +68,9 @@ const GROUPS: Group[] = [
     key: "현금성 자산", color: "var(--s1)",
     parts: [
       {
-        label: "VT · SGOV", sectors: ["현금성 자산"],
+        label: "SGOV · 현금", sectors: ["현금성 자산"],
         bullets: [
-          <>월드 인덱스 <b>VT</b> + 초단기 국채 <b>SGOV</b> (배당 자동 재투자 대상)</>,
+          <>초단기 국채 <b>SGOV</b>와 미집행 현금 (배당 자동 재투자 대상) — 월드 인덱스 <b>VT</b>는 9/21 전량 매도, 목표 폐지</>,
           <><b>20기 신규 스토리(알파 ③)</b>에 배정할 재원 — 견해 없는 대기 자본</>,
         ],
       },
