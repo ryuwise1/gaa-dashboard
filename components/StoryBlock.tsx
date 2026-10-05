@@ -43,8 +43,11 @@ const GROUPS: Group[] = [
         bullets: [<><b>메모리를 원가로 부담</b>하는 QCOM·AAPL·DELL·HPQ — 메모리 하락 국면의 방어</>],
       },
       {
-        label: "금리 바벨", sectors: ["금리 (인하)", "금리 (인상)"],
-        bullets: [<>장기 국채 <b>TLT·IEF</b> ↔ 은행 <b>JPM·BAC·XLF</b> 양방향 — 금리 방향 <b>중립화</b></>],
+        label: "금리 인상 헤지", sectors: ["금리 (인상)"],
+        bullets: [
+          <>은행 <b>JPM·BAC·XLF</b> — 고금리 장기화·인상 시 수혜</>,
+          <>인하 베팅(<b>TLT·IEF</b>)은 9/28 회의에서 <b>전량 매도</b> — 그 몫 7.5%는 현금성 자산 목표로 이동</>,
+        ],
       },
     ],
   },
