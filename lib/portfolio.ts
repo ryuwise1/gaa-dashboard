@@ -37,7 +37,7 @@ export interface Quote {
 export type QuoteMap = Record<string, Quote | undefined>;
 
 export const HOLDINGS = holdingsJson as {
-  meta: { team: string; targetTotalUsd: number; updatedAt: string; notionUrl: string };
+  meta: { team: string; targetTotalUsd: number; updatedAt: string; notionUrl: string; /** SGOV와 별개인 "현금" 목표 비중 — 종목이 아니라 MP에 자리가 없어 meta에 둔다 */ cashTargetWeight?: number };
   positions: Position[];
 };
 

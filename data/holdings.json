@@ -3,7 +3,8 @@
     "team": "GLIF 26-2 자산운용팀",
     "targetTotalUsd": 500000,
     "updatedAt": "2026-09-28",
-    "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48"
+    "notionUrl": "https://app.notion.com/p/3ad7b773b52e808aa34cc061ca6d2c48",
+    "cashTargetWeight": 0.5
   },
   "positions": [
     {
@@ -366,14 +367,14 @@
       "ticker": "SGOV",
       "name": "iShares 0-3M Treasury",
       "sector": "현금성 자산",
-      "targetWeight": 0.55,
-      "targetUsd": 275000,
+      "targetWeight": 0.05,
+      "targetUsd": 25000,
       "currency": "USD",
       "yahoo": "SGOV",
-      "status": "매수중",
+      "status": "매수완료",
       "qty": 255,
       "avgPrice": 100.4262,
-      "why": "집행 전 대기 자금의 운용 수단입니다. 9/28 금리 인하 포지션(TLT·IEF, 7.5%)을 전량 매도하면서 그 몫을 현금성 자산 목표로 옮겼습니다. VT(40%)와 EUAD(2.5%)는 9/21 전량 매도 후 목표를 폐지해 이 슬롯에 합산했습니다. 초단기 국채로 대기 중에도 연 4%대 수익을 확보합니다. 9/8부터 수령 배당을 이 종목으로 자동 재투자합니다.",
+      "why": "집행 전 대기 자금의 운용 수단입니다. 초단기 국채로 대기 중에도 연 4%대 수익을 확보합니다. 9/8부터 수령 배당을 이 종목으로 자동 재투자합니다. 그 외 미집행 현금은 SGOV와 별도로 \"현금\" 목표(50%)로 관리합니다.",
       "industry": "ETF · 미 초단기 국채",
       "about": "만기 3개월 이하의 미국 초단기 국채(T-bill)만 담는 ETF로, 이자를 매월 배당으로 지급합니다."
     }

@@ -84,25 +84,29 @@ export function buildAllocRows(rows: HoldingRow[]): { rows: AllocRow[]; nav: num
       };
     });
 
-  // 미집행 현금은 종목이 아니라서 MP에 자리가 없다.
+  // 현금은 종목이 아니라서 MP에 자리가 없다 — 목표는 holdings.json meta.cashTargetWeight.
   // 현금 정책(SGOV)과 성격이 완전히 다르므로 별도 행으로 세운다.
+  // 목표가 있으면 SGOV와 같은 방식으로 괴리를 본다. 목표가 0이면 예전처럼 전액 "미집행"이다.
   if (cashUsd > 0.005 * nav) {
     const ap = nav > 0 ? cashUsd / nav : 0;
+    const mp = HOLDINGS.meta.cashTargetWeight ?? 0;
+    const planned = mp > 0;
     out.push({
       key: "__cash__",
       ticker: null,
-      name: "미집행 현금",
+      name: planned ? "현금" : "미집행 현금",
       sector: "현금성 자산",
       currency: "USD",
-      mp: 0, ap, gap: ap, cause: "미집행",
-      shortfallUsd: cashUsd,
+      mp, ap, gap: ap - mp,
+      cause: planned ? (Math.abs(ap - mp) > mp * BAND ? "드리프트" : "정상") : "미집행",
+      shortfallUsd: planned ? 0 : cashUsd,
       excessUsd: 0,
       pnlUsd: null, share: null,
-      outOfBand: true,
+      outOfBand: planned ? Math.abs(ap - mp) > mp * BAND : true,
     });
   }
 
-  // 목표 비중이 큰 순서 — 미집행 현금(MP 0)은 자연히 맨 아래.
+  // 목표 비중이 큰 순서 — 현금 행도 같은 규칙으로 정렬된다(목표가 없으면 맨 아래).
   // 같은 비중끼리는 holdings.json 순서로 고정한다 — 괴리 순으로 두면 시세 갱신마다 행이 움직여 펼쳐 둔 행이 튄다.
   const order = new Map(HOLDINGS.positions.map((p, i) => [p.ticker, i]));
   out.sort((a, b) => (b.mp - a.mp) || ((order.get(a.ticker ?? "") ?? 1e9) - (order.get(b.ticker ?? "") ?? 1e9)));

@@ -66,7 +66,7 @@ const GROUPS: Group[] = [
       {
         label: "SGOV · 현금", sectors: ["현금성 자산"],
         bullets: [
-          <>초단기 국채 <b>SGOV</b>와 미집행 현금 (배당 자동 재투자 대상) — <b>VT</b>·<b>EUAD</b>는 9/21 전량 매도, 목표 폐지</>,
+          <>초단기 국채 <b>SGOV</b> 5%(배당 자동 재투자 대상)와 현금 50%를 따로 관리 — <b>VT</b>·<b>EUAD</b>는 9/21 전량 매도, 목표 폐지</>,
           <><b>20기 신규 스토리(알파 ③)</b>에 배정할 재원 — 견해 없는 대기 자본</>,
         ],
       },
@@ -75,7 +75,9 @@ const GROUPS: Group[] = [
 ];
 
 const weightOf = (sectors: string[]) =>
-  HOLDINGS.positions.filter((p) => sectors.includes(p.sector)).reduce((s, p) => s + p.targetWeight, 0);
+  HOLDINGS.positions.filter((p) => sectors.includes(p.sector)).reduce((s, p) => s + p.targetWeight, 0)
+  // SGOV와 별개로 관리하는 "현금" 목표는 종목이 아니라 meta에 있다
+  + (sectors.includes("현금성 자산") ? HOLDINGS.meta.cashTargetWeight ?? 0 : 0);
 const fmt = (w: number) => (w * 100).toFixed(2).replace(/\.?0+$/, "");
 
 export default function StoryBlock() {
