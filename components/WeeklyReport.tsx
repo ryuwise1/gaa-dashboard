@@ -5,6 +5,7 @@ import { HOLDINGS, SECTOR_ORDER, fmtLocalPrice, fmtUsd, type HoldingRow, type Qu
 import { MACRO, fmtMacro } from "@/lib/macro";
 import { AUM_USD, TRADES, cashUsd, realizedUsd } from "@/lib/trades";
 import notesJson from "@/data/meeting-notes.json";
+import { meetingLabel } from "@/lib/meeting";
 
 interface MeetingNote { no: number; date: string; title: string; agenda: string[]; decisions: string }
 const NOTES = (notesJson as { notes: MeetingNote[] }).notes;
@@ -98,7 +99,7 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   } else {
     for (const t of [...recent].sort((a, b) => a.date.localeCompare(b.date))) {
       const [, m, d] = t.date.split("-").map(Number);
-      const src = t.meeting ? `${t.meeting}차 회의 결정` : "수시 집행";
+      const src = t.meeting ? `${meetingLabel(t.meeting)}차 회의 결정` : "수시 집행";
       const why = t.note ? ` — ${clip(t.note.replace(/^수시 집행 \(정기회의 외\) — /, ""))}` : "";
       L.push(`- ${m}/${d} ${NAME_OF.get(t.ticker) ?? t.ticker} ${t.qty.toLocaleString()}주 ${t.side} @ ${fmtLocalPrice(t.currency, t.price)} (${src})${why}`);
     }
@@ -113,11 +114,11 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
     L.push("■ 회의 요약");
     for (const n of past) {
       const [, m, d] = n.date.split("-").map(Number);
-      L.push(`- ${n.no}차(${m}/${d}) ${n.title}: ${clip(n.decisions)}`);
+      L.push(`- ${meetingLabel(n.no)}차(${m}/${d}) ${n.title}: ${clip(n.decisions)}`);
     }
     if (next) {
       const [, m, d] = next.date.split("-").map(Number);
-      L.push(`- 차기 ${next.no}차(${m}/${d}) 예정 — ${next.title.replace(/ ?\(안건지\)/, "")} 등 안건 ${next.agenda.length}건`);
+      L.push(`- 차기 ${meetingLabel(next.no)}차(${m}/${d}) 예정 — ${next.title.replace(/ ?\(안건지\)/, "")} 등 안건 ${next.agenda.length}건`);
     }
     L.push("");
   }

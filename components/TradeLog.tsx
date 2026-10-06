@@ -7,6 +7,7 @@ import {
 } from "@/lib/portfolio";
 import { MEETINGS, OPENING_DATE, OPENING_POSITIONS, fmtTradeDate, realizedLots, realizedUsd, tradeDays, totalBuysUsd, totalSellsUsd } from "@/lib/trades";
 import Logo from "@/components/Logo";
+import { meetingLabel } from "@/lib/meeting";
 
 const NAME = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
 const SLOT = new Map(HOLDINGS.positions.map((p, i) => [p.ticker, i]));
@@ -80,7 +81,7 @@ export default function TradeLog({ unit, usdkrw }: { unit: Unit; usdkrw: number 
               <span className="log-date num">{fmtTradeDate(d.date)}</span>
               {d.meeting ? (
                 <span className="log-meet" title={`${d.meetingDate} 회의에서 결정`}>
-                  {d.meeting}차 회의 결정
+                  {meetingLabel(d.meeting)}차 회의 결정
                 </span>
               ) : (
                 <span className="log-meet plain">정기회의 외</span>
@@ -139,7 +140,7 @@ export default function TradeLog({ unit, usdkrw }: { unit: Unit; usdkrw: number 
         <div className="log-day opening">
           <div className="log-daybar">
             <span className="log-date num">{fmtTradeDate(OPENING_DATE)}</span>
-            <span className="log-meet plain">개시 포트폴리오 편입 (1차 회의 결정 · 적용 환율 1,450.1원)</span>
+            <span className="log-meet plain">개시 포트폴리오 편입 (19-1차 회의 결정 · 적용 환율 1,450.1원)</span>
           </div>
           <ul className="log-items">
             {OPENING_POSITIONS.map((p) => {
@@ -189,7 +190,7 @@ export default function TradeLog({ unit, usdkrw }: { unit: Unit; usdkrw: number 
 
       <p className="log-foot">
         원본 <span className="mono">data/trades.json</span> · 정기회의{" "}
-        {MEETINGS.filter((m) => m.executed).map((m) => `${m.no}차 ${m.date.slice(5).replace("-", "/")}`).join(" · ")}
+        {MEETINGS.filter((m) => m.executed).map((m) => `${meetingLabel(m.no)}차 ${m.date.slice(5).replace("-", "/")}`).join(" · ")}
       </p>
     </section>
   );

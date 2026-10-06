@@ -29,6 +29,7 @@ import Dividends from "@/components/Dividends";
 import TradeForm from "@/components/TradeForm";
 import WhyBlock from "@/components/WhyBlock";
 import Guide from "@/components/Guide";
+import { meetingLabel } from "@/lib/meeting";
 
 const REFRESH_OPEN_MS = 60_000;
 const REFRESH_CLOSED_MS = 300_000;
@@ -827,7 +828,7 @@ export default function Dashboard() {
                                   <div key={k} className="hist-item">
                                     <span className={`side ${t.side === "매수" ? "buy" : "sell"}`}>{t.side}</span>
                                     <span className="num hd">{fmtTradeDate(t.date)}</span>
-                                    {t.meeting ? <span className="hm">{t.meeting}차</span> : <span />}
+                                    {t.meeting ? <span className="hm">{meetingLabel(t.meeting)}차</span> : <span />}
                                     <span className="num hq">{t.qty.toLocaleString()}주 @ {fmtLocalPrice(r.currency, t.price)}</span>
                                     <span className="num hu">{money(t.usd)}</span>
                                     <span className="hn">{t.note}</span>

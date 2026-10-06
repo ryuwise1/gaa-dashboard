@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Logo from "@/components/Logo";
 import { HOLDINGS, tickerColorVar } from "@/lib/portfolio";
 import { MEETINGS, OPENING_DATE, TRADES, type Trade } from "@/lib/trades";
+import { meetingLabel } from "@/lib/meeting";
 
 /* ── 국기 — 국가명 텍스트 대신. Windows 크롬은 국기 이모지를 "KR" 글자로 그리므로 이미지로 ── */
 const FLAG: Record<string, string> = { 미국: "us", 유로존: "eu", 영국: "gb", 일본: "jp", 중국: "cn", 한국: "kr" };
@@ -396,9 +397,9 @@ export default function Calendar({ team = false }: { team?: boolean }) {
                               if (!o) return null;
                               return (
                                 <>
-                                  {o.opening && <div className="g-ev ours" title="1차 회의 결정으로 개시 포트폴리오 편입">★ 운용 개시</div>}
+                                  {o.opening && <div className="g-ev ours" title="19-1차 회의 결정으로 개시 포트폴리오 편입">★ 운용 개시</div>}
                                   {o.meetings.map((mt) => (
-                                    <div key={"mt" + mt.no} className="g-ev ours" title={mt.note}>{mt.no}차 회의</div>
+                                    <div key={"mt" + mt.no} className="g-ev ours" title={mt.note}>{meetingLabel(mt.no)}차 회의</div>
                                   ))}
                                   {o.trades.length > 0 && (
                                     <div className="g-ev ours" title={o.trades.map(fmtTradeLine).join(" · ")}>
@@ -450,9 +451,9 @@ export default function Calendar({ team = false }: { team?: boolean }) {
                 {o && (
                   <div className="cal-ours">
                     <div className="cal-col-head">우리 활동</div>
-                    {o.opening && <div className="cal-ours-item"><b>★ 운용 개시</b><span>1차 회의 결정으로 개시 포트폴리오 편입</span></div>}
+                    {o.opening && <div className="cal-ours-item"><b>★ 운용 개시</b><span>19-1차 회의 결정으로 개시 포트폴리오 편입</span></div>}
                     {o.meetings.map((mt) => (
-                      <div key={mt.no} className="cal-ours-item"><b>{mt.no}차 정기회의</b><span>{mt.note}</span></div>
+                      <div key={mt.no} className="cal-ours-item"><b>{meetingLabel(mt.no)}차 정기회의</b><span>{mt.note}</span></div>
                     ))}
                     {o.trades.map((t, i) => (
                       <div key={i} className="cal-ours-item">

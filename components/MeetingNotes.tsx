@@ -5,6 +5,7 @@ import notesJson from "@/data/meeting-notes.json";
 import Logo from "@/components/Logo";
 import { HOLDINGS, fmtLocalPrice, fmtPct, fmtSignedUsd, tickerColorVar, type Currency, type HoldingRow } from "@/lib/portfolio";
 import { TRADES, fmtTradeDate, realizedLots } from "@/lib/trades";
+import { meetingLabel } from "@/lib/meeting";
 
 /**
  * 회의록 문단은 한 덩어리 문자열이라 읽기 힘들다.
@@ -83,7 +84,7 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
         return (
           <article key={n.no} className="mtg" data-open={isOpen}>
             <button className="mtg-head" onClick={() => setOpen(isOpen ? null : n.no)} aria-expanded={isOpen}>
-              <span className="mtg-no num">{n.no}차</span>
+              <span className="mtg-no num">{meetingLabel(n.no)}차</span>
               <span className="mtg-title">
                 {n.title}
                 <span className="mtg-date num">{fmtTradeDate(n.date)}</span>
