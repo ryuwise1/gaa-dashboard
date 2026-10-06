@@ -16,58 +16,58 @@ interface Group { key: string; color: string; parts: Part[] }
 
 const GROUPS: Group[] = [
   {
-    key: "알파", color: "var(--s2)",
+    key: "공격형", color: "var(--s2)",
     parts: [
       {
-        label: "메모리 병목 — 메인", sectors: ["AI CapEx"],
+        label: "AI CapEx — 메모리 병목", sectors: ["AI CapEx"],
         bullets: [
           <>AI 데이터센터 투자 확대 → <b>메모리 공급 부족</b>이라는 판단</>,
           <>공급 측 <b>삼성전자·SK하이닉스</b> / 수요 측 <b>MSFT·META</b>, 파운드리 옵션 <b>INTC</b></>,
         ],
       },
       {
-        label: "AI 보안 — 위성", sectors: ["AI 보안"],
+        label: "AI 보안", sectors: ["AI 보안"],
         bullets: [
           <>AI 도입의 다음 단계 지출 — 탐지 <b>CrowdStrike</b>, 복구 <b>Rubrik</b></>,
-          <>메인 15% 대비 <b>1/3 크기(5%)</b>의 위성 슬리브 — 검증 전 테마는 작게 시작해 2차로 채운다 (현재 1차 약 40% 편입)</>,
+          <>20-1 종합안에서 <b>공격형으로 분류</b> — 목표 5%(RBRK 3 · CRWD 2), 현재 1차 약 40% 편입, 2차는 팀 승인 후 집행</>,
           <>GPT-6 Astra의 사이버보안 <b>&lsquo;Critical&rsquo; 등급</b> 도달(9/3)이 촉매</>,
         ],
       },
     ],
   },
   {
-    key: "헤지", color: "var(--s7)",
+    key: "방어형", color: "var(--s7)",
     parts: [
       {
         label: "메모리 역상관", sectors: ["메모리 역상관"],
-        bullets: [<><b>메모리를 원가로 부담</b>하는 QCOM·AAPL·DELL·HPQ — 메모리 하락 국면의 방어</>],
+        bullets: [<><b>메모리를 원가로 부담</b>하는 QCOM·AAPL·DELL·HPQ — 공격형(메모리 중심)이 커진 만큼 4.5%씩으로 증액</>],
       },
       {
-        label: "금리 인상 헤지", sectors: ["금리 (인상)"],
+        label: "은행 · 금리 인상 헤지", sectors: ["금리 (인상)"],
         bullets: [
           <>은행 <b>JPM·BAC·XLF</b> — 고금리 장기화·인상 시 수혜</>,
-          <>인하 베팅(<b>TLT·IEF</b>)은 9/28 회의에서 <b>전량 매도</b> — 그 몫 7.5%는 현금성 자산 목표로 이동</>,
+          <>인하 베팅(<b>TLT·IEF</b>)은 9/28(20-1) 회의에서 <b>전량 매도</b>, KRE 슬롯은 폐지</>,
         ],
       },
     ],
   },
   {
-    key: "분산", color: "var(--s3)",
+    key: "원자재", color: "var(--s3)",
     parts: [
       {
-        label: "에너지", sectors: ["에너지"],
+        label: "에너지 (원자재 관련주)", sectors: ["에너지"],
         bullets: [<>메이저 4종 <b>XOM·CVX·SHEL·TTE</b> — 지정학·유가 상방 대비, 배당</>],
       },
     ],
   },
   {
-    key: "현금성 자산", color: "var(--s1)",
+    key: "현금", color: "var(--s1)",
     parts: [
       {
         label: "SGOV · 현금", sectors: ["현금성 자산"],
         bullets: [
-          <>초단기 국채 <b>SGOV</b> 5%(배당 자동 재투자 대상)와 현금 50%를 따로 관리 — <b>VT</b>·<b>EUAD</b>는 9/21 전량 매도, 목표 폐지</>,
-          <><b>20기 신규 스토리(알파 ③)</b>에 배정할 재원 — 견해 없는 대기 자본</>,
+          <>초단기 국채 <b>SGOV</b> 5%(배당 자동 재투자 대상)와 현금 15%를 따로 관리 — 중간고사 전 20%, 이후 10%로 조정(20-1)</>,
+          <>종합안의 현금 20%는 시험 기간 대응 — 중간고사 이후 풀리는 10%의 행선지는 미정</>,
         ],
       },
     ],
