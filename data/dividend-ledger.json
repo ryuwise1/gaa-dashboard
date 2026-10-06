@@ -96,6 +96,46 @@
    "qty": 102,
    "currency": "USD",
    "usd": 32.64
+  },
+  {
+   "date": "2026-09-09",
+   "ticker": "HPQ",
+   "perShare": 0.3,
+   "qty": 421,
+   "currency": "USD",
+   "usd": 126.3
+  },
+  {
+   "date": "2026-09-21",
+   "ticker": "XLF",
+   "perShare": 0.197,
+   "qty": 108,
+   "currency": "USD",
+   "usd": 21.28
+  },
+  {
+   "date": "2026-09-21",
+   "ticker": "META",
+   "perShare": 0.525,
+   "qty": 25,
+   "currency": "USD",
+   "usd": 13.13
+  },
+  {
+   "date": "2026-09-30",
+   "ticker": "TTE",
+   "perShare": 1.021,
+   "qty": 140,
+   "currency": "USD",
+   "usd": 142.94
+  },
+  {
+   "date": "2026-10-01",
+   "ticker": "SGOV",
+   "perShare": 0.301,
+   "qty": 255,
+   "currency": "USD",
+   "usd": 76.75
   }
  ]
 }
