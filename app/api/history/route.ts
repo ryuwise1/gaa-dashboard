@@ -15,6 +15,8 @@ const UA =
  */
 
 const START = "2026-07-30";
+/** 일봉 조회 시작 — 개시 직전 종가가 들어오도록 START보다 열흘 앞. range=3mo로 두면 10월 말부터 개시 구간이 잘린다 */
+const PERIOD1 = Math.floor(Date.UTC(2026, 6, 20) / 1000);
 
 interface DayPoint {
   date: string;
@@ -30,7 +32,7 @@ const TTL_MS = 60 * 60_000; // 일봉이라 1시간이면 충분
 
 /** 야후 일봉 → { "2026-07-30": close, ... } (거래소 현지 날짜) */
 async function dailyCloses(symbol: string): Promise<Map<string, number>> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=3mo`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&period1=${PERIOD1}&period2=${Math.floor(Date.now() / 1000)}`;
   const res = await fetch(url, { headers: { "User-Agent": UA }, cache: "no-store" });
   const out = new Map<string, number>();
   if (!res.ok) return out;

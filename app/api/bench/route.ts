@@ -7,6 +7,8 @@ const UA =
 
 /** 운용 시작일 — 7/30 첫 집행 직전 종가를 기준선으로 삼는다 */
 const BASE_DATE = "2026-07-30";
+/** 일봉 조회 시작 — 기준일 직전 종가가 항상 들어오도록 고정. range=3mo로 두면 10월 말부터 기준 종가가 빠져 행이 사라진다 */
+const PERIOD1 = Math.floor(Date.UTC(2026, 6, 20) / 1000);
 
 const BENCH = [
   { symbol: "^KS11", label: "코스피" },
@@ -27,7 +29,7 @@ const TTL_MS = 10 * 60_000;
 
 /** 일봉에서 기준일 직전 종가와 최신 종가를 뽑는다 */
 async function fetchBench(symbol: string, label: string): Promise<BenchRow | null> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=3mo`;
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&period1=${PERIOD1}&period2=${Math.floor(Date.now() / 1000)}`;
   const res = await fetch(url, { headers: { "User-Agent": UA }, cache: "no-store" });
   if (!res.ok) return null;
 
