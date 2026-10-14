@@ -46,7 +46,7 @@ type Figure = "현재가" | "평가금";
 type Sort = "평가금액" | "수익률" | "당일";
 
 interface BenchRow { label: string; base: number; last: number; pct: number; pctUsd?: number; }
-interface HistoryPoint { date: string; totalUsd: number; benchUsd?: number | null; spxPct?: number | null; }
+interface HistoryPoint { date: string; totalUsd: number; benchUsd?: number | null; spxPct?: number | null; est?: true; }
 
 function deltaClass(n: number | null | undefined): string {
   if (n == null || n === 0) return "flat";
@@ -104,6 +104,8 @@ export default function Dashboard() {
     }
   };
   const [history, setHistory] = useState<HistoryPoint[]>([]);
+  /** 추이 계산 때 야후 일봉을 못 받은 심볼 — 그 종목은 마지막 체결가로 대신 평가됐다 */
+  const [histMissing, setHistMissing] = useState<string[]>([]);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [now, setNow] = useState<Date | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -157,7 +159,10 @@ export default function Dashboard() {
       .catch(() => {});
     fetch("/api/history")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.points?.length >= 2) setHistory(d.points); })
+      .then((d) => {
+        if (d?.points?.length >= 2) setHistory(d.points);
+        if (Array.isArray(d?.missing)) setHistMissing(d.missing);
+      })
       .catch(() => {});
   }, []);
   const toggleTheme = () => {
@@ -598,6 +603,11 @@ export default function Dashboard() {
                 </span>
               </div>
               {history.length >= 2 && <TrendChart points={history} base={AUM_USD} />}
+              {history.length >= 2 && (histMissing.length > 0 || history.some((p) => p.est)) && (
+                <p className="trend-note">
+                  일부 시세({histMissing.length ? histMissing.join(", ") : "일부 날짜"})를 받지 못해 마지막 체결가로 대신 계산했습니다. 잠시 뒤 다시 받아 옵니다.
+                </p>
+              )}
 
               {/* 리스크 지표 — 일별 총자산에서 계산. 절대값만으론 기준이 없어 같은 기간 S&P를 옆에 병기 */}
               {history.length >= 5 && (() => {

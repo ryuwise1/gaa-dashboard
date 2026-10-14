@@ -73,9 +73,10 @@ export async function GET() {
   } catch {}
 
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
-  // 보유했던 적이 있는 종목 전부 (미매수 제외)
+  // 보유했던 적이 있는 종목 전부 (미매수 제외) — 전량 매도한 종목(TLT·IEF 등)도 보유 기간의 배당은 받았다.
+  // 지금 수량만 보면 판 종목의 배당이 표에서 사라져 합계가 원장(dividend-ledger)보다 작아진다.
   const tickers = HOLDINGS.positions.filter(
-    (p) => qtyAt(p.ticker, today) > 0 || OPENING_POSITIONS.some((o) => o.ticker === p.ticker)
+    (p) => OPENING_POSITIONS.some((o) => o.ticker === p.ticker) || TRADES.some((t) => t.ticker === p.ticker)
   );
 
   const rows: DivRow[] = [];

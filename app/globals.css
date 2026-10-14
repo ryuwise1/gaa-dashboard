@@ -1032,6 +1032,7 @@ a { color: var(--accent); }
 .plan-row .bar i[data-done="true"] { background: var(--status-done); }
 
 /* 리스크 지표 — 총자산 추이 아래 */
+.trend-note { margin: 6px 0 0; font-size: 13px; color: var(--ink-2); }
 .risk-row {
   display: flex; gap: 18px; flex-wrap: wrap;
   margin-top: 8px; font-size: 11.5px; color: var(--muted);
