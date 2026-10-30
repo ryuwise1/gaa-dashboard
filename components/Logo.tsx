@@ -23,6 +23,8 @@ const CDN: Record<string, string> = {
   AAPL: "AAPL", DELL: "DELL", HPQ: "HPQ", XOM: "XOM", CVX: "CVX", SHEL: "SHEL",
   TLT: "TLT", IEF: "IEF", JPM: "JPM", BAC: "BAC", XLF: "XLF",
   SGOV: "SGOV", KRE: "KRE", EUAD: "EUAD", "005930": "005930", "000660": "000660",
+  // 10/16 배분안 편입 — GEV는 CDN 403이라 모노그램, 버크셔는 CDN 코드가 점 표기(BRK.B)
+  VRT: "VRT", ETN: "ETN", BE: "BE", XLP: "XLP", XLV: "XLV", "BRK-B": "BRK.B",
   // 오늘의 분석 관심 종목 (미보유) — 토스 CDN에 존재 확인된 미국 대형주
   NVDA: "NVDA", TSM: "TSM", AVGO: "AVGO", AMD: "AMD", MU: "MU", ASML: "ASML",
   GOOGL: "GOOGL", AMZN: "AMZN", ORCL: "ORCL", COP: "COP", SLB: "SLB", GS: "GS", MS: "MS",
@@ -31,7 +33,7 @@ const CDN: Record<string, string> = {
 
 /** 모노그램에 쓸 짧은 글자 — 로고가 없는 종목용 */
 const MONO: Record<string, string> = {
-  TTE: "TT", "2454.TW": "MTK",
+  TTE: "TT", "2454.TW": "MTK", GEV: "GEV",
 };
 
 /**
