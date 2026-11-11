@@ -130,6 +130,14 @@
    "usd": 13.13
   },
   {
+   "date": "2026-09-28",
+   "ticker": "005930",
+   "perShare": 4601,
+   "qty": 103,
+   "currency": "KRW",
+   "usd": 355.32
+  },
+  {
    "date": "2026-09-30",
    "ticker": "TTE",
    "perShare": 1.021,
@@ -152,6 +160,46 @@
    "qty": 18,
    "currency": "USD",
    "usd": 29.7
+  },
+  {
+   "date": "2026-10-20",
+   "ticker": "DELL",
+   "perShare": 0.63,
+   "qty": 14,
+   "currency": "USD",
+   "usd": 8.82
+  },
+  {
+   "date": "2026-10-27",
+   "ticker": "ASML",
+   "perShare": 2.096,
+   "qty": 11,
+   "currency": "USD",
+   "usd": 23.06
+  },
+  {
+   "date": "2026-10-27",
+   "ticker": "GEV",
+   "perShare": 0.5,
+   "qty": 17,
+   "currency": "USD",
+   "usd": 8.5
+  },
+  {
+   "date": "2026-11-02",
+   "ticker": "SGOV",
+   "perShare": 0.328581,
+   "qty": 259,
+   "currency": "USD",
+   "usd": 85.1
+  },
+  {
+   "date": "2026-11-10",
+   "ticker": "ETN",
+   "perShare": 1.1,
+   "qty": 37,
+   "currency": "USD",
+   "usd": 40.7
   }
  ]
 }
