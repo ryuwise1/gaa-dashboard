@@ -21,6 +21,8 @@ const NOTES = (notesJson as { notes: MeetingNote[] }).notes;
 
 interface Narrative {
   updatedAt: string;
+  /** 이번 주 주요 액션 맨 위 회의 요약 문장 — 비우면 "N차 회의(날짜) — 제목" 자동 */
+  meetingSummary?: string;
   /** 이번 주 주요 액션의 이유 — 그 주에 체결된 종목만 초안에 나온다 */
   actions: { ticker: string; title?: string; points: string[] }[];
   /** 주요 종목 변동 — 비중 큰 종목의 뉴스. 비어 있으면 섹션을 뺀다 */
@@ -50,6 +52,8 @@ const SHORT: Record<string, string> = {
   IEF: "IEF",
 };
 const nameOf = (ticker: string) => SHORT[ticker] ?? NAME_OF.get(ticker) ?? ticker;
+/** ETF — 그 자체가 분산 상품이라 개별 종목 집중도에서 뺀다 */
+const ETF = new Set(["VT", "SGOV", "TLT", "IEF", "KRE", "XLF", "XLP", "XLV", "EUAD"]);
 
 const SITE_URL = "https://gaa-dashboard-eight.vercel.app";
 /** 목표 이탈 밴드 — 목표 대비 ±25% (Allocation.tsx BAND와 같다) */
@@ -133,11 +137,17 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   L.push(`포트폴리오 ${usd0(valueUsd)} / 투자원금 ${usd0(costUsd)} / AUM ${usd0(AUM_USD)}`);
   L.push(`평가손익 ${usd0(pnl, true)} (${pct(costUsd > 0 ? pnl / costUsd : 0, 2)}) / 실현손익 ${usd0(realizedUsd, true)}`);
   L.push(`현금 ${usd0(cashUsd)} (AUM 대비 ${((cashUsd / AUM_USD) * 100).toFixed(1)}%)`);
-  L.push(`총자산 ${usd0(totalUsd)} (운용 개시 후 ${pct(totalUsd / AUM_USD - 1)})`);
+  // 이번 주 = history 마지막 점과, 그보다 7일 이상 앞선 마지막 점 비교 (실시간 값과 섞지 않는다)
+  const prev = cur
+    ? [...(history ?? [])].reverse().find((h) => kst(h.date) <= kst(cur.date) - 7 * 86400_000)
+    : undefined;
+  const week = prev && prev.totalUsd > 0 ? `이번 주 ${pct(cur!.totalUsd / prev.totalUsd - 1)}, ` : "";
+  L.push(`총자산 ${usd0(totalUsd)} (${week}운용 개시 후 ${pct(totalUsd / AUM_USD - 1)})`);
   // 초과수익은 추이 카드와 같은 점(총자산·PME 모두 history 마지막 값)에서 잰다
   if (cur?.benchUsd != null) {
     const a = ((cur.totalUsd - cur.benchUsd) / AUM_USD) * 100;
-    L.push(`PME 방식 벤치마크(S&P500) 대비 ${pp(a)} ${a >= 0 ? "상회" : "하회"}`);
+    const wk = prev?.benchUsd != null ? a - ((prev.totalUsd - prev.benchUsd) / AUM_USD) * 100 : null;
+    L.push(`PME 방식 벤치마크(S&P500) 대비 ${pp(a)} ${a >= 0 ? "상회" : "하회"}${wk != null ? ` (이번 주 ${pp(wk)})` : ""}`);
   }
   const macro = MACRO.map((m) => {
     const q = quotes[m.symbol];
@@ -164,7 +174,8 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   const recent = [...TRADES.filter((t) => kst(t.date) >= cutoff)].sort((a, b) => a.date.localeCompare(b.date));
   const meetings = NOTES.filter((n) => n.date <= todayIso && kst(n.date) >= cutoff - 3 * 86400_000);
   L.push("■ 이번 주 주요 액션", "");
-  for (const n of meetings) L.push(`${meetingLabel(n.no)}차 회의(${md(n.date)}) — ${n.title}`, "");
+  if (N.meetingSummary && meetings.length) L.push(N.meetingSummary, "");
+  else for (const n of meetings) L.push(`${meetingLabel(n.no)}차 회의(${md(n.date)}) — ${n.title}`, "");
   if (recent.length === 0) {
     L.push("신규 체결 없음 — 기존 포지션 유지", "");
   } else {
@@ -189,6 +200,12 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
         for (const t of ts) L.push(`- ${md(t.date)}: ${t.side} ${t.qty.toLocaleString()}주 x ${fmtLocalPrice(t.currency, t.price)}`);
       }
       const points = c?.points.length ? c.points : ts.map((t) => reason(t.note)).filter(Boolean) as string[];
+      // 배당 재투자는 정해진 규칙대로 한 일이라 설명 한 줄, 결과 줄 없음
+      if (kind === "배당 재투자") {
+        if (points[0]) L.push(`- ${points[0]}`);
+        L.push("");
+        return;
+      }
       for (const p of points) L.push(`- ${p}`);
       // 결과 한 줄 — 매도는 실현손익, 보유 중이면 현재 수량·비중
       const gain = realizedLots.filter((x) => x.ticker === ticker && kst(x.date) >= cutoff).reduce((x, y) => x + y.gainUsd, 0);
@@ -217,20 +234,33 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
     const c = N.concentration;
     risk.push(`섹터 집중도: ${c.label} 합산 ${curOf(c.sectors).toFixed(1)}% (목표 ${tgtOf(c.sectors).toFixed(1)}%)`);
   }
-  const top3 = [...priced].sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0)).slice(0, 3);
+  // 개별 종목 집중도 — ETF는 이미 분산 상품이라 뺀다
+  const top3 = priced.filter((r) => !ETF.has(r.ticker)).sort((a, b) => (b.weight ?? 0) - (a.weight ?? 0)).slice(0, 3);
   if (top3.length === 3) {
     const sum = top3.reduce((x, r) => x + (r.weight ?? 0), 0);
-    risk.push(`상위 3종목 집중도 ${(sum * 100).toFixed(1)}%: ${top3.map((r) => `${nameOf(r.ticker)}(${w(r)})`).join(", ")}`);
+    const one = top3.every((r) => r.sector === top3[0].sector) ? `, 모두 ${top3[0].sector} 섹터` : "";
+    risk.push(`개별 종목 집중도: 상위 3종목 ${top3.map((r) => `${nameOf(r.ticker)}(${w(r)})`).join(", ")} 합산 ${(sum * 100).toFixed(1)}%${one} (ETF 제외)`);
   }
   const off = sectors.filter((x) => Math.abs(x.cur / x.tgt - 1) > BAND);
   if (off.length) {
     risk.push(`목표 이탈: ${off.map((x) => `${x.s} ${x.cur.toFixed(1)}%(목표 ${x.tgt.toFixed(1)}%, ${pct(x.cur / x.tgt - 1, 0)})`).join(", ")} — ±25% 밴드 밖`);
   } else if (sectors.length) {
     const worst = sectors.reduce((a, b) => (Math.abs(b.cur - b.tgt) > Math.abs(a.cur - a.tgt) ? b : a));
-    risk.push(`목표 이탈: ±25% 밴드를 벗어난 섹터 없음 (최대 ${worst.s} ${pp(worst.cur - worst.tgt)})`);
+    risk.push(`목표 이탈: ±25%를 벗어난 섹터 없음 (가장 큰 차이 ${worst.s} ${pp(worst.cur - worst.tgt)})`);
   }
+  // 낙폭 큰 종목 — 같은 섹터에서 2종목 이상이면 묶어서 섹터 비중과 함께 쓴다
   const dd = priced.filter((r) => (r.pnlPct ?? 0) < DRAWDOWN).sort((a, b) => (a.pnlPct ?? 0) - (b.pnlPct ?? 0));
-  if (dd.length) risk.push(`낙폭 큰 종목: ${dd.map((r) => `${nameOf(r.ticker)} ${pct(r.pnlPct ?? 0)}`).join(", ")}`);
+  if (dd.length) {
+    const item = (r: HoldingRow) => `${nameOf(r.ticker)} ${pct(r.pnlPct ?? 0)}`;
+    const groups = SECTOR_ORDER.map((s) => ({ s, rs: dd.filter((r) => r.sector === s) })).filter((g) => g.rs.length >= 2);
+    const grouped = new Set(groups.flatMap((g) => g.rs.map((r) => r.ticker)));
+    const rest = dd.filter((r) => !grouped.has(r.ticker));
+    const parts = groups.map(
+      (g) => `${g.s} ${g.rs.length}종목(${g.rs.map(item).join(", ")}) 동반 하락, 섹터 ${curOf([g.s]).toFixed(1)}% (목표 ${tgtOf([g.s]).toFixed(1)}%)`
+    );
+    if (rest.length) parts.push(`${groups.length ? "그 밖에 " : ""}${rest.map(item).join(", ")}`);
+    risk.push(`낙폭 큰 종목: ${parts.join(" / ")}`);
+  }
   for (const r of N.risks) risk.push(`${r.title}: ${r.text}`);
   L.push("■ 리스크 관리", "");
   risk.forEach((x, i) => L.push(`${i + 1}. ${x}`));
