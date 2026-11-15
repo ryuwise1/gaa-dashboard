@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { HOLDINGS, SECTOR_ORDER, fmtLocalPrice, type HoldingRow, type QuoteMap } from "@/lib/portfolio";
 import { MACRO, fmtMacro } from "@/lib/macro";
-import { AUM_USD, TRADES, cashUsd, realizedUsd } from "@/lib/trades";
+import { AUM_USD, TRADES, cashUsd, realizedLots, realizedUsd } from "@/lib/trades";
 import notesJson from "@/data/meeting-notes.json";
 import narrativeJson from "@/data/weekly-narrative.json";
 import { meetingLabel } from "@/lib/meeting";
@@ -11,13 +11,16 @@ import { meetingLabel } from "@/lib/meeting";
 interface MeetingNote { no: number; date: string; title: string; agenda: string[]; decisions: string }
 const NOTES = (notesJson as { notes: MeetingNote[] }).notes;
 
-/** 사람이 쓰는 글 부분 — 운용 경과·투자 논거·향후 계획. 숫자는 아래 build()가 채운다. */
-interface Thesis { title: string; sectors: string[]; body: string; points: string[] }
+/**
+ * 사람이 쓰는 글 부분 — 운용 경과·투자 논거·향후 계획. 숫자는 아래 build()가 채운다.
+ * 투자 논거는 그 주에 바뀐 종목만 쓴다: changes[]에서 이번 주 체결된 티커만 골라 낸다.
+ */
+interface Change { ticker: string; title: string; body: string; points: string[] }
 interface Narrative {
   updatedAt: string;
   intro: string;
   progress: string[];
-  theses: Thesis[];
+  changes: Change[];
   concentration?: { label: string; sectors: string[] };
   risks: string[];
   plan: string[];
@@ -148,36 +151,51 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   }
   L.push("");
 
-  // ── 투자 논거 — 섹터별 목표·현재 비중과 보유 종목 수익률을 붙인다
-  // 목표가 AUM 기준이므로 현재 비중도 AUM 기준 (평가금액 기준이면 현금이 빠져 모든 섹터가 부풀어 보인다)
-  const bySector = new Map<string, number>();
-  for (const r of rows) bySector.set(r.sector, (bySector.get(r.sector) ?? 0) + (r.valueUsd ?? 0));
-  const tgtOf = (secs: string[]) =>
-    (HOLDINGS.positions.filter((p) => secs.includes(p.sector)).reduce((x, p) => x + p.targetUsd, 0) / AUM_USD) * 100;
-  const curOf = (secs: string[]) => (secs.reduce((x, s) => x + (bySector.get(s) ?? 0), 0) / AUM_USD) * 100;
-  N.theses.forEach((t, i) => {
-    L.push(`■ 투자 논거 ${i + 1}. ${t.title} (목표 ${tgtOf(t.sectors).toFixed(1)}% · 현재 ${curOf(t.sectors).toFixed(1)}%)`);
-    L.push(t.body);
-    for (const p of t.points) L.push(`- ${p}`);
-    const held = priced.filter((r) => t.sectors.includes(r.sector));
-    if (held.length) L.push(`→ 보유 ${held.map((r) => `${nameOf(r.ticker)} ${pct(r.pnlPct ?? 0)}`).join(" · ")}`);
-    L.push("", "");
-  });
-
   // ── 이번 주 매매 — 원장 최근 7일, 체결 사유 포함
   L.push("■ 이번 주 매매");
-  const recent = TRADES.filter((t) => Date.parse(t.date + "T00:00:00+09:00") >= cutoff);
+  const recent = [...TRADES.filter((t) => Date.parse(t.date + "T00:00:00+09:00") >= cutoff)].sort((a, b) => a.date.localeCompare(b.date));
   if (recent.length === 0) {
     L.push("- 신규 체결 없음 (기존 포지션 유지)");
   } else {
-    for (const t of [...recent].sort((a, b) => a.date.localeCompare(b.date))) {
+    for (const t of recent) {
       const src = t.meeting ? `, ${meetingLabel(t.meeting)}차 회의 결정` : t.note?.startsWith("수시 집행") ? ", 수시 집행" : "";
       L.push(`- ${t.side} ${nameOf(t.ticker)} ${t.qty.toLocaleString()}주 @ ${fmtLocalPrice(t.currency, t.price)} (${md(t.date)}${src})`);
       const why = reason(t.note);
       if (why) L.push(`  ${why}`);
     }
   }
-  L.push("");
+  L.push("", "");
+
+  // ── 투자 논거 — 이번 주에 바뀐 종목만. 배당 재투자(SGOV)는 운용 판단이 아니라 제외한다.
+  const changed = [...new Set(recent.filter((t) => !t.note?.startsWith("배당 재투자")).map((t) => t.ticker))];
+  const rowOf = new Map(rows.map((r) => [r.ticker, r]));
+  changed.forEach((ticker, i) => {
+    const c = N.changes.find((x) => x.ticker === ticker);
+    const r = rowOf.get(ticker);
+    const pos = HOLDINGS.positions.find((p) => p.ticker === ticker);
+    L.push(`■ 투자 논거 ${i + 1}. ${nameOf(ticker)} — ${c?.title ?? recent.filter((t) => t.ticker === ticker).map((t) => t.side).join("·")}`);
+    if (c) {
+      L.push(c.body);
+      for (const p of c.points) L.push(`- ${p}`);
+    } else if (pos?.why) {
+      // 글이 아직 없으면 편입 근거(holdings why) 앞 두 문장으로 대신한다
+      L.push(pos.why.split(/(?<=다\.)\s+/).slice(0, 2).join(" "));
+    }
+    if (r && r.qty > 0 && r.pnlPct != null) {
+      L.push(`→ 현재 ${pct(r.pnlPct)} · 비중 ${((r.weight ?? 0) * 100).toFixed(1)}% (평가금액 대비)`);
+    } else {
+      const gain = realizedLots.filter((x) => x.ticker === ticker && Date.parse(x.date + "T00:00:00+09:00") >= cutoff).reduce((x, y) => x + y.gainUsd, 0);
+      L.push(`→ 전량 매도, 이번 주 실현손익 ${usd0(gain, true)}`);
+    }
+    L.push("", "");
+  });
+
+  // 섹터 비중 — 목표가 AUM 기준이므로 현재 비중도 AUM 기준 (평가금액 기준이면 현금이 빠져 모든 섹터가 부풀어 보인다)
+  const bySector = new Map<string, number>();
+  for (const r of rows) bySector.set(r.sector, (bySector.get(r.sector) ?? 0) + (r.valueUsd ?? 0));
+  const tgtOf = (secs: string[]) =>
+    (HOLDINGS.positions.filter((p) => secs.includes(p.sector)).reduce((x, p) => x + p.targetUsd, 0) / AUM_USD) * 100;
+  const curOf = (secs: string[]) => (secs.reduce((x, s) => x + (bySector.get(s) ?? 0), 0) / AUM_USD) * 100;
 
   // ── 리스크 관리
   L.push("■ 리스크 관리");
@@ -240,8 +258,8 @@ export default function WeeklyReport(props: Props) {
         </div>
       </div>
       <p className="wr-hint">
-        현황·종목별 수익률·섹터 비중·이번 주 매매·회의 결정·리스크는 시세와 원장에서 자동으로 채워집니다.
-        운용 경과·투자 논거·향후 계획 문장은 data/weekly-narrative.json에서 가져옵니다
+        현황·종목별 수익률·이번 주 매매·회의 결정·리스크는 시세와 원장에서 자동으로 채워집니다.
+        투자 논거는 이번 주에 바뀐 종목만 나오고, 운용 경과·논거·향후 계획 문장은 data/weekly-narrative.json에서 가져옵니다
         ({md(NARRATIVE.updatedAt)} 수정{stale ? " — 1주 넘게 지나 내용 확인 필요" : ""}).
       </p>
       {show && <pre className="wr-pre">{text}</pre>}
