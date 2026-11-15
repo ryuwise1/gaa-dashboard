@@ -312,3 +312,4 @@ MP 구조를 집계하면 스토리는 **이미 설계도에 들어 있다.** �
 
 - `components/Logo.tsx`가 SSR/CSR 간 style 객체 표기가 달라 **hydration mismatch 경고**를 낸다
   (TTE 등 로고 이미지가 없어 모노 이니셜로 떨어지는 종목). 화면은 정상이라 방치 중.
+- **2026-11-15 후속 4 (META 9주 매도 이유)** — 사용자 확인: 11/11 회의의 META 남은 9주 매도는 11/2에 시작한 분할 매도의 연장선. `meeting-notes.json` 20-4차 안건 ①과 `weekly-narrative.json` META points에 반영.
