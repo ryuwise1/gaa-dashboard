@@ -124,7 +124,7 @@ const SECTIONS: Section[] = [
     where: "팀 모드 화면 곳곳",
     items: [
       { name: "오늘 할 일", what: "탭 위 배너. 집행 예정 · 룰 감시 · 결정 대기 · 기록 대기. 기본 접힘, 오늘 마감 건은 강조", team: true },
-      { name: "주간 운용보고 초안", what: "탭 아래. 현황 · 종목별 수익률 · 운용 경과 · 이번 주 매매 · 바뀐 종목의 투자 논거 · 리스크 · 향후 계획을 채운 카톡용 초안. 숫자는 자동, 글은 data/weekly-narrative.json. ‘카톡용 복사’ 버튼", team: true },
+      { name: "주간 운용보고 초안", what: "탭 아래. 현황 · 종목별 수익률 · 섹터 비중 · 이번 주 주요 액션(이유 포함) · 주요 종목 변동 · 리스크 · 향후 관전 포인트를 채운 카톡용 초안. 숫자는 자동, 글은 data/weekly-narrative.json. ‘카톡용 복사’ 버튼", team: true },
       { name: "보드 변경 로그", what: "맨 아래. GitHub 커밋 목록 — 누가 언제 무엇을 바꿨는지", team: true },
     ],
   },
