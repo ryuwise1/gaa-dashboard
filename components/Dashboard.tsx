@@ -316,6 +316,7 @@ export default function Dashboard() {
 
   const deployedPct = Math.min(investedUsd / AUM_USD, 1);
   const totalAssetUsd = totals.valueUsd + cashUsd;
+  const cashLikeUsd = (rows.find((r) => r.ticker === "SGOV")?.valueUsd ?? 0) + cashUsd;
 
   const updatedText = fetchedAt
     ? new Date(fetchedAt).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })
@@ -558,9 +559,10 @@ export default function Dashboard() {
 
             <div className="sum-cards">
               <div className="sum-card">
-                <div className="k">현금</div>
-                <div className="v num">{fmtUsd(cashUsd)}</div>
-                <div className="s num">AUM 대비 {((cashUsd / AUM_USD) * 100).toFixed(1)}%</div>
+                {/* 9/28부터 미배분 현금은 전액 SGOV로 보유한다 — 현금 대신 SGOV 평가액(+배당 재투자 대기분)을 보여준다 */}
+                <div className="k">현금성 자산 (SGOV)</div>
+                <div className="v num">{fmtUsd(cashLikeUsd)}</div>
+                <div className="s num">AUM 대비 {((cashLikeUsd / AUM_USD) * 100).toFixed(1)}%</div>
               </div>
               <div className="sum-card">
                 <div className="k">오늘 변동</div>

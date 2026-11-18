@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import notesJson from "@/data/meeting-notes.json";
 import Logo from "@/components/Logo";
 import { HOLDINGS, fmtLocalPrice, fmtPct, fmtSignedUsd, tickerColorVar, type Currency, type HoldingRow } from "@/lib/portfolio";
-import { TRADES, fmtTradeDate, realizedLots } from "@/lib/trades";
+import { LEDGER, TRADES, fmtTradeDate, realizedLots } from "@/lib/trades";
 import { meetingLabel } from "@/lib/meeting";
 
 /**
@@ -44,6 +44,28 @@ const NOTES = (notesJson as { notes: Note[] }).notes;
 const NAME = new Map(HOLDINGS.positions.map((p) => [p.ticker, p.name]));
 
 /**
+ * 체결마다 그 전후의 보유 수량·평단 (현지통화). ledger-core와 같은 이동평균 규칙 —
+ * 매수는 평단이 바뀌고, 매도는 수량만 줄고 평단은 그대로다.
+ */
+type Step = { qtyBefore: number; qtyAfter: number; avgBefore: number; avgAfter: number };
+const stepKey = (t: { date: string; ticker: string; qty: number; price: number }) => `${t.date}|${t.ticker}|${t.qty}|${t.price}`;
+const STEPS: Map<string, Step> = (() => {
+  const book = new Map<string, { qty: number; avg: number }>();
+  for (const p of LEDGER.openingPositions.positions) book.set(p.ticker, { qty: p.qty, avg: p.avgPrice });
+  const out = new Map<string, Step>();
+  for (const t of [...TRADES].sort((a, b) => a.date.localeCompare(b.date))) {
+    const b = book.get(t.ticker) ?? { qty: 0, avg: 0 };
+    const next = t.side === "매수"
+      ? { qty: b.qty + t.qty, avg: (b.qty * b.avg + t.qty * t.price) / (b.qty + t.qty) }
+      : { qty: b.qty - t.qty, avg: b.avg };
+    out.set(`${t.side}|${stepKey(t)}`, { qtyBefore: b.qty, qtyAfter: next.qty, avgBefore: b.avg, avgAfter: next.avg });
+    book.set(t.ticker, next);
+  }
+  return out;
+})();
+const qtyFmt = (n: number) => n.toLocaleString("en-US", { maximumFractionDigits: 4 });
+
+/**
  * 회의록 — 노션 회의 내용의 요지 + 그 회의에서 결정한 체결이
  * 지금 어떤 성과인지를 원장에서 자동으로 되짚는다. 팀 전용 화면.
  */
@@ -55,12 +77,19 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
 
   // 회의별: 매수 건은 "그때 산 가격 → 지금", 매도 건은 확정 손익
   const perf = useMemo(() => {
-    const m = new Map<number, { buys: { t: (typeof TRADES)[number]; nowPct: number | null }[]; sells: typeof realizedLots }>();
+    const m = new Map<number, {
+      buys: { t: (typeof TRADES)[number]; nowPct: number | null; nowUsd: number | null; soldOut: boolean }[];
+      sells: typeof realizedLots;
+    }>();
     for (const n of NOTES) {
       const buys = TRADES.filter((t) => t.meeting === n.no && t.side === "매수").map((t) => {
         const r = rowBy.get(t.ticker);
         const nowPct = r?.price != null ? (r.price - t.price) / t.price : null;
-        return { t, nowPct };
+        // 현지통화 1단위의 오늘 달러 가치 — 보유 중이면 평가액에서 역산, 달러 종목은 1
+        const fx = t.currency === "USD" ? 1
+          : r && r.qty > 0 && r.valueUsd != null && r.price ? r.valueUsd / (r.qty * r.price) : null;
+        const nowUsd = r?.price != null && fx != null ? t.qty * (r.price - t.price) * fx : null;
+        return { t, nowPct, nowUsd, soldOut: !r || r.qty <= 0 };
       });
       const sells = realizedLots.filter((l) => l.meeting === n.no);
       m.set(n.no, { buys, sells });
@@ -79,7 +108,8 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
         const p = perf.get(n.no)!;
         const isOpen = open === n.no;
         const buyCount = p.buys.length;
-        const avgNow = p.buys.filter((b) => b.nowPct != null);
+        // 이후 전량 매도한 종목의 매수는 지금 가격과 비교하지 않는다 — 결과는 매도 확정손익에 있다
+        const avgNow = p.buys.filter((b) => b.nowPct != null && !b.soldOut);
         const hit = avgNow.filter((b) => (b.nowPct ?? 0) > 0).length;
         return (
           <article key={n.no} className="mtg" data-open={isOpen}>
@@ -133,29 +163,49 @@ export default function MeetingNotes({ rows }: { rows: HoldingRow[] }) {
                   <div className="mtg-agenda">
                     <div className="h">이 회의의 성적표 (현재 기준)</div>
                     <ul className="mtg-perf">
-                      {p.sells.map((l, i) => (
-                        <li key={`s-${l.ticker}-${l.date}-${i}`} className="num">
-                          <Logo ticker={l.ticker} name={NAME.get(l.ticker) ?? l.ticker} color={tickerColorVar(l.ticker, 0)} size={20} />
-                          <span className="mtg-perf-txt">
-                            <b>{NAME.get(l.ticker) ?? l.ticker}</b> {l.qty}주 익절 —
-                            확정 <i className={l.gainUsd >= 0 ? "gain" : "loss"}>
-                              {fmtSignedUsd(l.gainUsd)} ({fmtPct(l.pct, 1)})
-                            </i>
-                          </span>
-                        </li>
-                      ))}
-                      {p.buys.map(({ t, nowPct }, i) => (
-                        <li key={`b-${t.ticker}-${t.date}-${i}`} className="num">
-                          <Logo ticker={t.ticker} name={NAME.get(t.ticker) ?? t.ticker} color={tickerColorVar(t.ticker, 0)} size={20} />
-                          <span className="mtg-perf-txt">
-                            <b>{NAME.get(t.ticker) ?? t.ticker}</b> {t.qty.toLocaleString()}주 @{" "}
-                            {fmtLocalPrice(t.currency as Currency, t.price)} →{" "}
-                            {nowPct == null ? "—" : (
-                              <i className={nowPct > 0 ? "gain" : nowPct < 0 ? "loss" : "flat"}>{fmtPct(nowPct, 1)}</i>
-                            )}
-                          </span>
-                        </li>
-                      ))}
+                      {p.sells.map((l, i) => {
+                        const s = STEPS.get(`매도|${stepKey(l)}`);
+                        const cur = l.currency as Currency;
+                        // 이름표는 손익 부호로 — 손실 매도를 "익절"로 적지 않는다. SGOV는 매수 대금 충당용 매도
+                        const tag = l.ticker === "SGOV" ? "매수 대금 충당" : l.gainUsd > 0 ? "익절" : l.gainUsd < 0 ? "손절" : "본전";
+                        return (
+                          <li key={`s-${l.ticker}-${l.date}-${i}`} className="num">
+                            <Logo ticker={l.ticker} name={NAME.get(l.ticker) ?? l.ticker} color={tickerColorVar(l.ticker, 0)} size={20} />
+                            <span className="mtg-perf-txt">
+                              <b>{NAME.get(l.ticker) ?? l.ticker}</b>{" "}
+                              {s && s.qtyAfter <= 0 ? "전량" : ""} {qtyFmt(l.qty)}주 매도 @ {fmtLocalPrice(cur, l.price)}
+                              {s && <> · 보유 {qtyFmt(s.qtyBefore)} → {qtyFmt(s.qtyAfter)}주</>}
+                              {" "}· 평단 {fmtLocalPrice(cur, l.avgAtSale)} · {tag}{" "}
+                              <i className={l.gainUsd > 0 ? "gain" : l.gainUsd < 0 ? "loss" : "flat"}>
+                                {fmtSignedUsd(l.gainUsd)} ({fmtPct(l.pct, 1)})
+                              </i>
+                            </span>
+                          </li>
+                        );
+                      })}
+                      {p.buys.map(({ t, nowPct, nowUsd, soldOut }, i) => {
+                        const s = STEPS.get(`매수|${stepKey(t)}`);
+                        const cur = t.currency as Currency;
+                        return (
+                          <li key={`b-${t.ticker}-${t.date}-${i}`} className="num">
+                            <Logo ticker={t.ticker} name={NAME.get(t.ticker) ?? t.ticker} color={tickerColorVar(t.ticker, 0)} size={20} />
+                            <span className="mtg-perf-txt">
+                              <b>{NAME.get(t.ticker) ?? t.ticker}</b> {qtyFmt(t.qty)}주 매수 @ {fmtLocalPrice(cur, t.price)}
+                              {s && (s.qtyBefore > 0
+                                ? <> · 평단 {fmtLocalPrice(cur, s.avgBefore)} → {fmtLocalPrice(cur, s.avgAfter)}</>
+                                : <> · 신규 편입</>)}
+                              {" "}·{" "}
+                              {soldOut ? "이후 전량 매도" : nowPct == null ? "—" : (
+                                <>체결가 대비{" "}
+                                  <i className={nowPct > 0 ? "gain" : nowPct < 0 ? "loss" : "flat"}>
+                                    {nowUsd != null && `${fmtSignedUsd(nowUsd)} `}({fmtPct(nowPct, 1)})
+                                  </i>
+                                </>
+                              )}
+                            </span>
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 )}

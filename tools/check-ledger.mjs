@@ -37,7 +37,8 @@ for (const p of H.positions) {
   const avg = p.avgPrice ?? 0;
   // 평단은 반올림해서 저장하는 경우가 있어 0.05% 여유를 둔다
   const avgOk = !b.avg || Math.abs(avg - b.avg) < Math.max(0.01, b.avg * 0.0005);
-  if (qty !== b.qty || !avgOk) {
+  // SGOV 소수점 수량(11/18~)은 부동소수 합에서 끝자리가 흔들린다 — 1e-6주 이내는 같은 값으로 본다
+  if (Math.abs(qty - b.qty) > 1e-6 || !avgOk) {
     problems.push(
       `${p.ticker.padEnd(8)} holdings qty=${qty} avg=${avg}  ≠  원장 qty=${b.qty} avg=${b.avg.toFixed(4)}`
     );
