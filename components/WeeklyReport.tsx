@@ -25,6 +25,8 @@ interface Narrative {
   meetingSummary?: string;
   /** 이번 주 주요 액션의 이유 — 그 주에 체결된 종목만 초안에 나온다 */
   actions: { ticker: string; title?: string; points: string[] }[];
+  /** 여러 종목을 한 결정으로 묶어 쓰기 — 여기 든 티커는 종목별 항목 대신 묶음 하나로 나온다 */
+  groups?: { title: string; tickers: string[]; points: string[] }[];
   /** 주요 종목 변동 — 비중 큰 종목의 뉴스. 비어 있으면 섹션을 뺀다 */
   movers: { ticker: string; points: string[] }[];
   /** 집중도 점검에 쓸 섹터 묶음 */
@@ -50,10 +52,11 @@ const SHORT: Record<string, string> = {
   SGOV: "SGOV",
   TLT: "TLT",
   IEF: "IEF",
+  XLE: "에너지 ETF",
 };
 const nameOf = (ticker: string) => SHORT[ticker] ?? NAME_OF.get(ticker) ?? ticker;
 /** ETF — 그 자체가 분산 상품이라 개별 종목 집중도에서 뺀다 */
-const ETF = new Set(["VT", "SGOV", "TLT", "IEF", "KRE", "XLF", "XLP", "XLV", "EUAD"]);
+const ETF = new Set(["VT", "SGOV", "TLT", "IEF", "KRE", "XLF", "XLP", "XLV", "EUAD", "XLE"]);
 
 const SITE_URL = "https://gaa-dashboard-eight.vercel.app";
 /** 목표 이탈 밴드 — 목표 대비 ±25% (Allocation.tsx BAND와 같다) */
@@ -117,7 +120,7 @@ function actionKind(ts: Trade[], qtyNow: number): string {
 }
 
 /** 카톡에 그대로 붙여넣는 주간 운용보고 초안. 숫자는 화면과 같은 소스에서 나온다. */
-function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
+export function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   const L: string[] = [];
   const totalUsd = valueUsd + cashUsd;
   const cutoff = Date.now() - 7 * 86400_000;
@@ -160,14 +163,14 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
   L.push("■ 종목별 수익률 (비중 - 주식 평가금액 기준)", "");
   L.push(priced.map((r) => `${nameOf(r.ticker)} ${pct(r.pnlPct ?? 0)} (${w(r)})`).join(" | "), "");
 
-  // ── 섹터 비중 — 목표가 AUM 기준이므로 현재도 AUM 기준 (평가금액 기준이면 현금이 빠져 모든 섹터가 부풀어 보인다)
+  // ── 섹터 비중 — 목표 비중(MP) 대비 총자산(평가+현금) 기준 현재 비중. AUM 기준이면 손익만큼 모든 섹터가 목표에서 벗어나 보인다
   const bySector = new Map<string, number>();
   for (const r of rows) bySector.set(r.sector, (bySector.get(r.sector) ?? 0) + (r.valueUsd ?? 0));
   const tgtOf = (secs: string[]) =>
-    (HOLDINGS.positions.filter((p) => secs.includes(p.sector)).reduce((x, p) => x + p.targetUsd, 0) / AUM_USD) * 100;
-  const curOf = (secs: string[]) => (secs.reduce((x, s) => x + (bySector.get(s) ?? 0), 0) / AUM_USD) * 100;
+    HOLDINGS.positions.filter((p) => secs.includes(p.sector)).reduce((x, p) => x + p.targetWeight, 0) * 100;
+  const curOf = (secs: string[]) => (secs.reduce((x, s) => x + (bySector.get(s) ?? 0), 0) / totalUsd) * 100;
   const sectors = SECTOR_ORDER.map((s) => ({ s, tgt: tgtOf([s]), cur: curOf([s]) })).filter((x) => x.tgt > 0);
-  L.push("■ 섹터 비중 (목표 / 현재 - AUM 기준)", "");
+  L.push("■ 섹터 비중 (목표 / 현재 - 총자산 기준)", "");
   L.push(sectors.map((x) => `${x.s} ${x.tgt.toFixed(1)}% / ${x.cur.toFixed(1)}%`).join(" | "), "");
 
   // ── 이번 주 주요 액션 — 종목별로 묶고, 이유는 narrative(없으면 체결 note)
@@ -185,7 +188,21 @@ function build({ rows, quotes, valueUsd, costUsd, history }: Props): string {
     const order = [...byTicker.entries()].sort(
       ([, a], [, b]) => Number(!!a[0].note?.startsWith("배당 재투자")) - Number(!!b[0].note?.startsWith("배당 재투자"))
     );
-    order.forEach(([ticker, ts], i) => {
+    // 묶음 — narrative.groups에 든 티커는 결정 하나로 모아 쓴다
+    const groups = (N.groups ?? []).map((g) => ({ ...g, ts: recent.filter((t) => g.tickers.includes(t.ticker)) })).filter((g) => g.ts.length);
+    const grouped = new Set(groups.flatMap((g) => g.ts.map((t) => t.ticker)));
+    groups.forEach((g, i) => {
+      const src = g.ts[0].meeting ? ` (${meetingLabel(g.ts[0].meeting)}차 회의 결정)` : "";
+      const days = [...new Set(g.ts.map((t) => md(t.date)))].join("·");
+      L.push(`${i + 1}. ${g.title} — ${days}${src}`);
+      for (const t of g.ts) L.push(`- ${t.side} ${nameOf(t.ticker)} ${t.qty.toLocaleString()}주 x ${fmtLocalPrice(t.currency, t.price)}, ${usd0(t.usd)}`);
+      for (const p of g.points) L.push(`- ${p}`);
+      const gain = realizedLots.filter((x) => g.tickers.includes(x.ticker) && kst(x.date) >= cutoff).reduce((x, y) => x + y.gainUsd, 0);
+      if (g.ts.some((t) => t.side === "매도")) L.push(`- 실현손익 ${usd0(gain, true)}`);
+      L.push("");
+    });
+    order.filter(([ticker]) => !grouped.has(ticker)).forEach(([ticker, ts], j) => {
+      const i = groups.length + j;
       const r = rowOf.get(ticker);
       const qtyNow = r?.qty ?? HOLDINGS.positions.find((p) => p.ticker === ticker)?.qty ?? 0;
       const c = N.actions.find((x) => x.ticker === ticker);
