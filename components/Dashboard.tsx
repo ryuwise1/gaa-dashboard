@@ -130,7 +130,13 @@ export default function Dashboard() {
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   /** 추이 계산 때 야후 일봉을 못 받은 심볼 — 그 종목은 마지막 체결가로 대신 평가됐다 */
   const [histMissing, setHistMissing] = useState<string[]>([]);
-  const trend = useMemo(() => fromGen20(history), [history]);
+  /** 추이 기간 — 기본 20기(9/28~), 전체는 19기 개시(7/30~). 브라우저에 기억한다 */
+  const [trendRange, setTrendRange] = useState<"20기" | "전체">("20기");
+  const trend = useMemo(() => (trendRange === "전체" ? { points: history, base: AUM_USD } : fromGen20(history)), [history, trendRange]);
+  const pickTrendRange = (r: "20기" | "전체") => {
+    setTrendRange(r);
+    try { localStorage.setItem("gaa-trend", r); } catch {}
+  };
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [now, setNow] = useState<Date | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -142,6 +148,7 @@ export default function Dashboard() {
     // 새 키(gaa-unit2)만 읽는다 — 예전 키에 남은 원화 선호가 새 기본값(달러)을 덮지 않게.
     // 현재가/평가금 토글은 저장하지 않는다 — 세션 안에서만 유지.
     const u = localStorage.getItem("gaa-unit2");
+    try { if (localStorage.getItem("gaa-trend") === "전체") setTrendRange("전체"); } catch {}
     if (u === "KRW") setUnit("KRW");
     // 탭 복원 — URL의 ?tab=슬러그가 최우선(공유 링크), 없으면 마지막에 보던 탭.
     // 팀 전용 탭은 팀 모드일 때만 살린다. "보유 비중"은 모바일 전용이라 복원하지 않는다.
@@ -629,6 +636,18 @@ export default function Dashboard() {
                   </span>
                 </span>
               </div>
+              {history.length >= 2 && (
+                <div className="trend-range">
+                  <span>추이 기간</span>
+                  <div className="seg" role="group" aria-label="추이 기간">
+                    {(["20기", "전체"] as const).map((r) => (
+                      <button key={r} aria-pressed={trendRange === r} onClick={() => pickTrendRange(r)}>
+                        {r === "20기" ? "20기 (9/28~)" : "전체 (7/30~)"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
               {trend.points.length >= 2 && <TrendChart points={trend.points} base={trend.base} />}
               {history.length >= 2 && (histMissing.length > 0 || history.some((p) => p.est)) && (
                 <p className="trend-note">
@@ -669,7 +688,7 @@ export default function Dashboard() {
                       <summary>지표 설명</summary>
                       <div className="metric-notes-body">
                         <p><b>동일흐름</b>우리와 같은 날·같은 금액으로 S&P를 분할 매수했을 때(회색 실선) 대비. 종목 선택 성과입니다.</p>
-                        <p><b>지수등락</b>20기 시작일(9/28)에 전액을 지수에 넣었을 때(점선) 대비. 현금 보유 비용까지 포함한 값입니다.</p>
+                        <p><b>지수등락</b>추이 기간 시작일(20기 9/28 또는 개시 7/30)에 전액을 지수에 넣었을 때(점선) 대비. 현금 보유 비용까지 포함한 값입니다.</p>
                         <p><b>MDD</b>최고점 대비 최대 하락폭입니다.</p>
                         <p><b>변동성</b>하루 등락 폭의 연환산. 낮을수록 안정적입니다.</p>
                         <p><b>샤프</b>위험 대비 초과수익(무위험 4% 가정). 1 이상이면 준수하나, 운용 초기에는 연환산 탓에 과대 표시됩니다.</p>

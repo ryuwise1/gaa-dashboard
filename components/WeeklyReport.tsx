@@ -34,6 +34,8 @@ interface Narrative {
   risks: { title: string; text: string }[];
   /** 향후 관전 포인트 */
   watch: { title: string; points: string[] }[];
+  /** 링크 바로 위 안내 — 보드 변경 같은 한 주짜리 공지. "※ "를 붙여 한 줄씩 */
+  notes?: string[];
   closing: string;
 }
 const N = narrativeJson as unknown as Narrative;
@@ -294,6 +296,10 @@ export function build({ rows, quotes, valueUsd, costUsd, history }: Props): stri
     if (next) L.push(`${N.watch.length + 1}. 차기 ${meetingLabel(next.no)}차 회의 (${md(next.date)}) — 안건 ${next.agenda.length}건`, "");
   }
 
+  if (N.notes?.length) {
+    for (const x of N.notes) L.push(`※ ${x}`);
+    L.push("");
+  }
   L.push(`실시간 포트폴리오: ${SITE_URL}`, "");
   L.push(N.closing);
   return L.join("\n");

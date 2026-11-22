@@ -196,6 +196,7 @@ a { color: var(--accent); }
 .sum-delta .sub { font-weight: 600; margin-left: 4px; }
 /* 총자산 추이 — 예산 블록 하단, 호버로 일별 값 탐색 */
 .trend { margin-top: 10px; }
+.trend-range { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--ink-2); }
 .trend svg { width: 100%; height: 56px; display: block; cursor: crosshair; touch-action: pan-y; }
 .trend-info {
   display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;
