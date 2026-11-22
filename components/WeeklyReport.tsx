@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { HOLDINGS, SECTOR_ORDER, fmtLocalPrice, type HoldingRow, type QuoteMap } from "@/lib/portfolio";
-import { MACRO, fmtMacro } from "@/lib/macro";
 import { AUM_USD, TRADES, cashUsd, realizedLots, realizedUsd, type Trade } from "@/lib/trades";
 import notesJson from "@/data/meeting-notes.json";
 import narrativeJson from "@/data/weekly-narrative.json";
@@ -131,7 +130,7 @@ export function build({ rows, quotes, valueUsd, costUsd, history }: Props): stri
     .sort((a, b) => (b.pnlPct ?? 0) - (a.pnlPct ?? 0));
   const w = (r: HoldingRow | undefined) => ((r?.weight ?? 0) * 100).toFixed(1) + "%";
 
-  L.push(`안녕하십니까 선배님들, 자산운용팀 주간 운용보고 드립니다. (${asOf(quotes)})`, "");
+  L.push(`추가적으로 자산운용팀 주간 운용보고 전달드립니다. (${asOf(quotes)})`, "");
 
   // ── 포트폴리오 현황
   const pnl = valueUsd - costUsd;
@@ -139,7 +138,9 @@ export function build({ rows, quotes, valueUsd, costUsd, history }: Props): stri
   L.push("■ 포트폴리오 현황", "");
   L.push(`포트폴리오 ${usd0(valueUsd)} / 투자원금 ${usd0(costUsd)} / AUM ${usd0(AUM_USD)}`);
   L.push(`평가손익 ${usd0(pnl, true)} (${pct(costUsd > 0 ? pnl / costUsd : 0, 2)}) / 실현손익 ${usd0(realizedUsd, true)}`);
-  L.push(`현금 ${usd0(cashUsd)} (AUM 대비 ${((cashUsd / AUM_USD) * 100).toFixed(1)}%)`);
+  // 현금성 자산 = SGOV 평가액 + 현금 (첫 화면 카드와 같은 정의)
+  const cashLike = (rowOf.get("SGOV")?.valueUsd ?? 0) + cashUsd;
+  L.push(`현금성 자산(SGOV) ${usd0(cashLike)} (AUM 대비 ${((cashLike / AUM_USD) * 100).toFixed(1)}%)`);
   // 이번 주 = history 마지막 점과, 그보다 7일 이상 앞선 마지막 점 비교 (실시간 값과 섞지 않는다)
   const prev = cur
     ? [...(history ?? [])].reverse().find((h) => kst(h.date) <= kst(cur.date) - 7 * 86400_000)
@@ -152,11 +153,6 @@ export function build({ rows, quotes, valueUsd, costUsd, history }: Props): stri
     const wk = prev?.benchUsd != null ? a - ((prev.totalUsd - prev.benchUsd) / AUM_USD) * 100 : null;
     L.push(`PME 방식 벤치마크(S&P500) 대비 ${pp(a)} ${a >= 0 ? "상회" : "하회"}${wk != null ? ` (이번 주 ${pp(wk)})` : ""}`);
   }
-  const macro = MACRO.map((m) => {
-    const q = quotes[m.symbol];
-    return q?.price != null ? `${m.label.replace("S&P 500", "S&P500")} ${fmtMacro(m, q.price)}` : null;
-  }).filter(Boolean) as string[];
-  if (macro.length) L.push(macro.join(" | "));
   L.push("");
 
   // ── 종목별 수익률 — 수익률 높은 순 한 문단
@@ -195,7 +191,10 @@ export function build({ rows, quotes, valueUsd, costUsd, history }: Props): stri
       const src = g.ts[0].meeting ? ` (${meetingLabel(g.ts[0].meeting)}차 회의 결정)` : "";
       const days = [...new Set(g.ts.map((t) => md(t.date)))].join("·");
       L.push(`${i + 1}. ${g.title} — ${days}${src}`);
-      for (const t of g.ts) L.push(`- ${t.side} ${nameOf(t.ticker)} ${t.qty.toLocaleString()}주 x ${fmtLocalPrice(t.currency, t.price)}, ${usd0(t.usd)}`);
+      // 체결일이 여럿이면 마지막 날이 아닌 체결에만 날짜를 붙인다
+      const last = g.ts[g.ts.length - 1].date;
+      const multi = new Set(g.ts.map((t) => t.date)).size > 1;
+      for (const t of g.ts) L.push(`- ${t.side} ${nameOf(t.ticker)} ${t.qty.toLocaleString()}주 x ${fmtLocalPrice(t.currency, t.price)}, ${usd0(t.usd)}${multi && t.date !== last ? ` (${md(t.date)})` : ""}`);
       for (const p of g.points) L.push(`- ${p}`);
       const gain = realizedLots.filter((x) => g.tickers.includes(x.ticker) && kst(x.date) >= cutoff).reduce((x, y) => x + y.gainUsd, 0);
       if (g.ts.some((t) => t.side === "매도")) L.push(`- 실현손익 ${usd0(gain, true)}`);
@@ -275,7 +274,7 @@ export function build({ rows, quotes, valueUsd, costUsd, history }: Props): stri
     const parts = groups.map(
       (g) => `${g.s} ${g.rs.length}종목(${g.rs.map(item).join(", ")}) 동반 하락, 섹터 ${curOf([g.s]).toFixed(1)}% (목표 ${tgtOf([g.s]).toFixed(1)}%)`
     );
-    if (rest.length) parts.push(`${groups.length ? "그 밖에 " : ""}${rest.map(item).join(", ")}`);
+    if (rest.length) parts.push(`${groups.length ? "그 외 " : ""}${rest.map(item).join(", ")}`);
     risk.push(`낙폭 큰 종목: ${parts.join(" / ")}`);
   }
   for (const r of N.risks) risk.push(`${r.title}: ${r.text}`);
