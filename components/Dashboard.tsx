@@ -47,6 +47,30 @@ type Sort = "평가금액" | "수익률" | "당일";
 
 interface BenchRow { label: string; base: number; last: number; pct: number; pctUsd?: number; }
 interface HistoryPoint { date: string; totalUsd: number; benchUsd?: number | null; spxPct?: number | null; est?: true; }
+/** 20기 운용 시작일(20-1 회의) — 추이 차트·리스크 지표는 이날부터 그린다 */
+const GEN20_START = "2026-09-28";
+/**
+ * 추이를 20기 시작 기준으로 다시 맞춘다. 기준 = 시작 직전 거래일 종가의 총자산.
+ * 지수등락은 그날 지수 대비, 동일흐름(PME)은 그날 우리 평가액을 지수에 넣었다고 보고
+ * 이후 현금흐름은 원래대로 둔다: bench' = bench + (기준 총자산 − 기준 bench) × 지수 비율.
+ */
+function fromGen20(points: HistoryPoint[]): { points: HistoryPoint[]; base: number } {
+  const i = points.findIndex((p) => p.date >= GEN20_START);
+  if (i <= 0) return { points, base: AUM_USD };
+  const p0 = points[i - 1];
+  const s0 = p0.spxPct != null ? 1 + p0.spxPct : null;
+  return {
+    base: p0.totalUsd,
+    points: points.slice(i).map((p) => {
+      const r = s0 != null && p.spxPct != null ? (1 + p.spxPct) / s0 : null;
+      return {
+        ...p,
+        spxPct: r != null ? +(r - 1).toFixed(5) : null,
+        benchUsd: r != null && p.benchUsd != null && p0.benchUsd != null ? Math.round(p.benchUsd + (p0.totalUsd - p0.benchUsd) * r) : null,
+      };
+    }),
+  };
+}
 
 function deltaClass(n: number | null | undefined): string {
   if (n == null || n === 0) return "flat";
@@ -106,6 +130,7 @@ export default function Dashboard() {
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   /** 추이 계산 때 야후 일봉을 못 받은 심볼 — 그 종목은 마지막 체결가로 대신 평가됐다 */
   const [histMissing, setHistMissing] = useState<string[]>([]);
+  const trend = useMemo(() => fromGen20(history), [history]);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [now, setNow] = useState<Date | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -604,7 +629,7 @@ export default function Dashboard() {
                   </span>
                 </span>
               </div>
-              {history.length >= 2 && <TrendChart points={history} base={AUM_USD} />}
+              {trend.points.length >= 2 && <TrendChart points={trend.points} base={trend.base} />}
               {history.length >= 2 && (histMissing.length > 0 || history.some((p) => p.est)) && (
                 <p className="trend-note">
                   일부 시세({histMissing.length ? histMissing.join(", ") : "일부 날짜"})를 받지 못해 마지막 체결가로 대신 계산했습니다. 잠시 뒤 다시 받아 옵니다.
@@ -612,7 +637,7 @@ export default function Dashboard() {
               )}
 
               {/* 리스크 지표 — 일별 총자산에서 계산. 절대값만으론 기준이 없어 같은 기간 S&P를 옆에 병기 */}
-              {history.length >= 5 && (() => {
+              {trend.points.length >= 5 && (() => {
                 const stats = (vals: number[], base: number) => {
                   // 최대낙폭: 고점 대비 최대 하락
                   let peak = vals[0], mdd = 0;
@@ -626,9 +651,9 @@ export default function Dashboard() {
                   const sharpe = vol > 0 ? (annRet - 0.04) / vol : null;
                   return { mdd, vol, sharpe };
                 };
-                const ours = stats(history.map((p) => p.totalUsd), AUM_USD);
-                // 같은 기간 S&P — spxPct(개시 직전 대비 누적 등락)로 지수 가치 시계열 복원
-                const spxVals = history.filter((p) => p.spxPct != null).map((p) => 1 + p.spxPct!);
+                const ours = stats(trend.points.map((p) => p.totalUsd), trend.base);
+                // 같은 기간 S&P — spxPct(20기 시작 직전 대비 누적 등락)로 지수 가치 시계열 복원
+                const spxVals = trend.points.filter((p) => p.spxPct != null).map((p) => 1 + p.spxPct!);
                 const spx = spxVals.length >= 5 ? stats(spxVals, 1) : null;
                 return (
                   <>
@@ -644,7 +669,7 @@ export default function Dashboard() {
                       <summary>지표 설명</summary>
                       <div className="metric-notes-body">
                         <p><b>동일흐름</b>우리와 같은 날·같은 금액으로 S&P를 분할 매수했을 때(회색 실선) 대비. 종목 선택 성과입니다.</p>
-                        <p><b>지수등락</b>개시일에 전액을 지수에 넣었을 때(점선) 대비. 현금 보유 비용까지 포함한 값입니다.</p>
+                        <p><b>지수등락</b>20기 시작일(9/28)에 전액을 지수에 넣었을 때(점선) 대비. 현금 보유 비용까지 포함한 값입니다.</p>
                         <p><b>MDD</b>최고점 대비 최대 하락폭입니다.</p>
                         <p><b>변동성</b>하루 등락 폭의 연환산. 낮을수록 안정적입니다.</p>
                         <p><b>샤프</b>위험 대비 초과수익(무위험 4% 가정). 1 이상이면 준수하나, 운용 초기에는 연환산 탓에 과대 표시됩니다.</p>

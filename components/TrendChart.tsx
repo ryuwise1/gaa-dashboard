@@ -29,7 +29,7 @@ export default function TrendChart({
   h = 56,
 }: {
   points: TrendPoint[];
-  /** AUM — 점선 기준선 */
+  /** 기준 총자산 — 점선 기준선 (20기 시작 직전 종가) */
   base: number;
   h?: number;
 }) {
@@ -158,7 +158,7 @@ export default function TrendChart({
       </div>
       {(alpha != null || vsIndex != null) && (
         <div className="trend-legend num">
-          <span><i className="sw ours" style={{ background: stroke }} />우리 총자산</span>
+          <span><i className="sw ours" style={{ background: stroke }} />총자산</span>
           <span><i className="sw bench" />S&P 동일흐름</span>
           <span><i className="sw idx" />S&P 지수등락</span>
         </div>
