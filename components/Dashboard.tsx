@@ -571,7 +571,7 @@ export default function Dashboard() {
             )}
             {/* 이름+수치는 한 덩어리로 — 줄이 바뀌어도 "S&P 500 / +4.6%"처럼 짝이 갈라지지 않게 */}
             {bench.length > 0 && hasLive && (
-              <p className="bench num" title="7/30 운용 시작 직전 종가 대비 지수 등락">
+              <p className="bench num" title="7/30 운용 시작 직전 종가 대비 지수 등락 · 자산운용팀은 총자산(평가+현금)의 AUM 대비 등락">
                 <span className="bench-lead">운용 시작 후</span>
                 {bench.map((b) => (
                   <span key={b.label} className="bench-item">
@@ -579,7 +579,8 @@ export default function Dashboard() {
                   </span>
                 ))}
                 <span className="bench-item me">
-                  자산운용팀 <b className={deltaClass(totalPct)}>{fmtPct(totalPct, 1)}</b>
+                  {/* 지수와 같은 잣대 — 원가 대비 손익률이 아니라 총자산의 AUM 대비 등락 */}
+                  자산운용팀 <b className={deltaClass(totalAssetUsd - AUM_USD)}>{fmtPct(totalAssetUsd / AUM_USD - 1, 1)}</b>
                 </span>
               </p>
             )}
